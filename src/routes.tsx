@@ -15,7 +15,7 @@ import { Svg } from "./Components/Commom/components";
 const RoutesPerson = () => {
   const { user } = useContext(UserContext);
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Menu />
       <Svg />
       <Modal />
