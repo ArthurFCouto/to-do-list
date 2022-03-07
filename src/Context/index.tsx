@@ -2,9 +2,10 @@
 import { useState, createContext } from "react";
 
 interface User {
-    email: String | null;
-    password: String | null;
-    token: String | null;
+    email: string | null;
+    name: string | null;
+    password: string | null;
+    token: string | null;
 }; //Criamos a interface, modelo que será o nosso objeto user
 
 type Context = {
@@ -17,6 +18,7 @@ export const UserContext = createContext<Partial<Context>>({}); //Exportamos o n
 function UserProvider({ children }: any) {
   const [user, setUser] = useState({
     email: null,
+    name: null,
     password: null,
     token: null,
   });

@@ -1,4 +1,5 @@
-import React, { useReducer, useState, useContext, FormEvent } from "react";
+import React, { useReducer, useState, useContext } from "react";
+import { setCookie } from "nookies";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
 import { SectionCenterStyled, SectionStyled } from "../../Components/Commom";
@@ -9,8 +10,6 @@ export default function Login() {
   const { setUser } = useContext(UserContext);
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [alterClass, dispatchAlter] = useReducer(Alter, {
     class: "alert-primary",
     aria: "Info:",
@@ -49,43 +48,17 @@ export default function Login() {
     }
   }
 
-  const Alert = () => {
-    return (
-      <div
-        className={`alert ${alterClass.class} d-flex align-items-center`}
-        role="alert"
-        style={{ position: "relative" }}
-      >
-        <svg
-          className="bi flex-shrink-0 me-2"
-          width="24"
-          height="24"
-          role="img"
-          aria-label={alterClass.aria}
-        >
-          <use xlinkHref={alterClass.icon} />
-        </svg>
-        <div>{message}</div>
-        <button
-          type="button"
-          className="btn-close"
-          aria-label="Close"
-          style={{ right: "10px", position: "absolute" }}
-          onClick={() => setVisible(false)}
-        />
-      </div>
-    );
-  };
-
-  const Login = async (e: FormEvent) => {
+  const Login = async (e: any) => {
     e.preventDefault();
-    setMessage("Aguarde, validando seus dados...");
-    dispatchAlter({ status: "info" });
-    setVisible(true);
+    const data = new FormData(e.currentTarget);
     const body = {
-      email: email,
-      password: password,
+      email: data.get("email"),
+      password: data.get("password"),
+      remember: data.get("remember"),
     };
+    dispatchAlter({ status: "info" });
+    setMessage("Aguarde, validando seus dados...");
+    setVisible(true);
     await fetch(`https://apitasklist.herokuapp.com/session`, {
       method: "POST",
       headers: {
@@ -100,12 +73,18 @@ export default function Login() {
           const { user, token } = res;
           if (setUser)
             setUser({
-              email: email,
-              password: password,
+              email: body.email,
+              name: user.name,
+              password: body.password,
               token,
             });
           setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
-          setTimeout(() => navigate("/"), 800);
+          if (body.remember)
+            setCookie(null, "USER_TOKEN", token, {
+              maxAge: 604800,
+              path: "/",
+            });
+          navigate("/");
         } else {
           setMessage(`Error: ${res.error}`);
         }
@@ -124,6 +103,7 @@ export default function Login() {
           src="login.png"
           style={{
             maxWidth: "300px",
+            maxHeight: "185px",
             height: "auto",
           }}
           alt="Faça login ou cadastre-se"
@@ -142,8 +122,8 @@ export default function Login() {
               type="email"
               className="form-control"
               id="email"
+              name="email"
               required
-              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="mb-3">
@@ -151,22 +131,27 @@ export default function Login() {
               Password
             </label>
             <div className="row mb-3">
-              <div className="col-sm-10">
+              <div className="col">
                 <input
                   type="password"
                   className="form-control"
                   id="password"
+                  name="password"
                   required
-                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <ButtonModal text="Esqueci a senha" />
             </div>
           </div>
           <div className="mb-3 form-check">
-            <input type="checkbox" className="form-check-input" id="remember" />
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="remember"
+              name="remember"
+            />
             <label className="form-check-label" htmlFor="remember">
-              lembrar-me
+              Manter sessão aberta
             </label>
           </div>
           <div
@@ -189,7 +174,31 @@ export default function Login() {
           </div>
         </form>
       </SectionStyled>
-      {visible && Alert()}
+      {visible && (
+        <div
+          className={`alert ${alterClass.class} d-flex align-items-center`}
+          role="alert"
+          style={{ position: "relative" }}
+        >
+          <svg
+            className="bi flex-shrink-0 me-2"
+            width="24"
+            height="24"
+            role="img"
+            aria-label={alterClass.aria}
+          >
+            <use xlinkHref={alterClass.icon} />
+          </svg>
+          <div>{message}</div>
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            style={{ right: "10px", position: "absolute" }}
+            onClick={() => setVisible(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

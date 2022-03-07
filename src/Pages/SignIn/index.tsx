@@ -49,8 +49,8 @@ export default function SignIn() {
     }
   }
 
-  async function Redirect(body: object) {
-    await fetch(`https://apitasklist.herokuapp.com/session`, {
+  function Redirect(body: object) {
+    fetch(`https://apitasklist.herokuapp.com/session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export default function SignIn() {
     );
   };
 
-  const Register = async (e: FormEvent) => {
+  const Register = (e: FormEvent) => {
     e.preventDefault();
     window.scrollTo(0, 0);
     setMessage("Aguarde, validando seus dados...");
@@ -122,7 +122,7 @@ export default function SignIn() {
       email: email,
       password: password,
     };
-    await fetch(`https://apitasklist.herokuapp.com/user`, {
+    fetch(`https://apitasklist.herokuapp.com/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,6 +153,7 @@ export default function SignIn() {
             src="signin.png"
             style={{
               maxWidth: "300px",
+              maxHeight: "185px",
               height: "auto",
             }}
             alt="Cadastre-se"

@@ -1,17 +1,31 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
+import { parseCookies, destroyCookie } from "nookies";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../Context";
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
+
   const logout = () => {
     if (setUser)
       setUser({
         email: null,
+        name: null,
         password: null,
         token: null,
       });
+    destroyCookie(null, "USER_TOKEN");
   };
+
+  useEffect(()=> {
+    const cookies = parseCookies();
+    //Usar jwt para processar todas as informações de user.
+    if(cookies.USER_TOKEN && setUser)
+      setUser({
+        ...user,
+        token: cookies.USER_TOKEN
+      })
+  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">

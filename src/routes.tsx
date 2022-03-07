@@ -10,6 +10,7 @@ import Modal from "./Components/Modal";
 import { Svg } from "./Components/Commom/components";
 
 //Conferir: https://github.com/remix-run/react-router/blob/main/docs/getting-started/tutorial.md
+//Houve mudança no modo de utilização
 
 const RoutesPerson = () => {
   const { user } = useContext(UserContext);
@@ -22,7 +23,7 @@ const RoutesPerson = () => {
         <Route path="/" element={user?.token == null ? <Login /> : <Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/home/:email" element={<Dashboard />} />
+        { /*<Route path="/home/:email" element={<Dashboard />} /> */}
         <Route path="*" element={<h1>Olha só, essa página não existe</h1>} />
       </Routes>
     </BrowserRouter>

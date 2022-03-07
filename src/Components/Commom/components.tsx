@@ -19,18 +19,19 @@ export const Svg = () => {
 };
 
 type text = {
-  text: String
-}
+  text: String;
+};
 
-export function ButtonModal({text}:text) {
+export function ButtonModal({ text }: text) {
   return (
     <button
       type="button"
       className="col-sm-2 btn btn-link"
       data-bs-toggle="modal"
       data-bs-target="#exampleModal"
+      style={{ width: "auto" }}
     >
       {text}
     </button>
   );
-};
+}
