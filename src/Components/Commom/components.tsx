@@ -19,7 +19,7 @@ export const Svg = () => {
 };
 
 type text = {
-  text: String;
+  text: string;
 };
 
 export function ButtonModal({ text }: text) {

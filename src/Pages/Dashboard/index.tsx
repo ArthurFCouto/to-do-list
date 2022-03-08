@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
 
 type Task = {
@@ -9,7 +10,8 @@ type Task = {
 };
 
 export default function Dashboard() {
-  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
   const [list, setList] = useState(
     <tr>
       <th scope="row">0</th>

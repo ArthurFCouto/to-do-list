@@ -19,7 +19,7 @@ export default function Menu() {
 
   useEffect(()=> {
     const cookies = parseCookies();
-    //Usar jwt para processar todas as informações de user.
+    //Usar jwt para processar todas as informações de user. Mudar no back-end
     if(cookies.USER_TOKEN && setUser)
       setUser({
         ...user,

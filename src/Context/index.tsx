@@ -1,5 +1,5 @@
 //Observações para o context com typescript
-import { useState, createContext } from "react";
+import React, { useState, createContext } from "react";
 
 interface User {
     email: string | null;
@@ -13,9 +13,13 @@ type Context = {
     setUser: React.Dispatch<any>;
 } //Criamos o tipo que será o nosso contexto, o que poderá ser acessado por ele
 
+type Props = {
+  children: React.ReactNode
+} //Criamos um tipo props para podermos receber o filhos do componente
+
 export const UserContext = createContext<Partial<Context>>({}); //Exportamos o nosso contexto que tem que ser do tipo definido acima, e usamos o Partial para criar um contexto vazio
 
-function UserProvider({ children }: any) {
+function UserProvider({ children }: Props) {
   const [user, setUser] = useState({
     email: null,
     name: null,
