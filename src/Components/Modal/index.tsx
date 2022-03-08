@@ -38,7 +38,7 @@ export default function Modal() {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="exampleModalLabel">
-              Modal title
+              Esqueci a senha
             </h5>
             <button
               type="button"
@@ -47,17 +47,19 @@ export default function Modal() {
               aria-label="Close"
             ></button>
           </div>
-          <div className="modal-body">...</div>
+          <div className="modal-body">
+            Ainda em implementação
+          </div>
           <div className="modal-footer">
             <button
               type="button"
               className="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Close
+              Fechar
             </button>
             <button type="button" className="btn btn-primary">
-              Save changes
+              Salvar
             </button>
           </div>
         </div>

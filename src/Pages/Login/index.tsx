@@ -169,7 +169,7 @@ export default function Login() {
               Cadastre-se
             </button>
             <button type="submit" className="btn btn-primary">
-              Enviar
+              Entrar
             </button>
           </div>
         </form>
