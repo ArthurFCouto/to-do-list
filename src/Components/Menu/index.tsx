@@ -17,14 +17,12 @@ export default function Menu() {
     destroyCookie(null, "USER_TOKEN");
   };
 
-  useEffect(()=> {
+  useEffect(() => {
     const cookies = parseCookies();
-    //Usar jwt para processar todas as informações de user. Mudar no back-end
-    if(cookies.USER_TOKEN && setUser)
-      setUser({
-        ...user,
-        token: cookies.USER_TOKEN
-      })
+    if (cookies.USER_TOKEN && setUser) {
+      const cookiesJson = JSON.parse(cookies.USER_TOKEN);
+      setUser(cookiesJson);
+    }
   }, []);
 
   return (
@@ -58,7 +56,7 @@ export default function Menu() {
             {user?.token != null && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link active" aria-current="page" to="/">
+                  <Link className="nav-link active" aria-current="page" to="/dashboard">
                     Dashboard
                   </Link>
                 </li>
@@ -113,17 +111,18 @@ export default function Menu() {
               </button>
             </form>
           )}
-          <ul
-            className="navbar-nav mb-2 mb-lg-0"
-            style={{ cursor: "pointer" }}
-          >
+          <ul className="navbar-nav mb-2 mb-lg-0" style={{ cursor: "pointer" }}>
             {user?.token == null ? (
               <li className="nav-item">
-                <Link className="nav-link active" to="/login">Login</Link>
+                <Link className="nav-link active" to="/login">
+                  Login
+                </Link>
               </li>
             ) : (
               <li className="nav-item" onClick={() => logout()}>
-                <Link className="nav-link  active" to="/login">Sair</Link>
+                <Link className="nav-link  active" to="/login">
+                  Sair
+                </Link>
               </li>
             )}
           </ul>

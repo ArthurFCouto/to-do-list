@@ -18,6 +18,23 @@ export const Svg = () => {
   );
 };
 
+type SpinnerColor = {
+  color?: "text-primary" | "text-light" | "text-success"
+}
+
+export const SpinnerLoading = (props: SpinnerColor) => {
+  return (
+    <div className="d-flex justify-content-center">
+      <div
+        className={"spinner-border spinner-border-sm "+props?.color}
+        role="status"
+      >
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  );
+};
+
 type text = {
   text: string;
 };

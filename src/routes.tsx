@@ -8,6 +8,7 @@ import Dashboard from "./Pages/Dashboard";
 import Menu from "./Components/Menu";
 import Modal from "./Components/Modal";
 import { Svg } from "./Components/Commom/components";
+import Home from "./Pages/Home";
 
 //Conferir: https://github.com/remix-run/react-router/blob/main/docs/getting-started/tutorial.md
 //Houve mudança no modo de utilização
@@ -15,12 +16,13 @@ import { Svg } from "./Components/Commom/components";
 const RoutesPerson = () => {
   const { user } = useContext(UserContext);
   return (
-    <BrowserRouter basename={process.env.PUBLIC_URL}>
+    <BrowserRouter>
       <Menu />
       <Svg />
       <Modal />
       <Routes>
-        <Route path="/" element={user?.token == null ? <Login /> : <Dashboard />} />
+        <Route path="/" element={user?.token == null ? <Login /> : <Home />} />
+        <Route path="/dashboard" element={user?.token == null ? <Login /> : <Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-in" element={<SignIn />} />
         { /*<Route path="/home/:email" element={<Dashboard />} /> */}

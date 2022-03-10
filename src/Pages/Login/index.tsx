@@ -48,7 +48,7 @@ export default function Login() {
     }
   }
 
-  const Login = async (e: any) => {
+  const Login = (e: any) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const body = {
@@ -59,7 +59,7 @@ export default function Login() {
     dispatchAlter({ status: "info" });
     setMessage("Aguarde, validando seus dados...");
     setVisible(true);
-    await fetch(`https://apitasklist.herokuapp.com/session`, {
+    fetch(`https://apitasklist.herokuapp.com/session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,19 +71,22 @@ export default function Login() {
         dispatchAlter({ status: response.status });
         if (response.status === 200) {
           const { user, token } = res;
+          const obj = {
+            email: body.email,
+            name: user.name,
+            password: body.password,
+            token,
+          };
           if (setUser)
-            setUser({
-              email: body.email,
-              name: user.name,
-              password: body.password,
-              token,
-            });
+            setUser(obj);
           setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
-          if (body.remember)
-            setCookie(null, "USER_TOKEN", token, {
+          if (body.remember) {
+            const cookie = JSON.stringify(obj);
+            setCookie(null, "USER_TOKEN", cookie, {
               maxAge: 604800,
               path: "/",
             });
+          }
           navigate("/");
         } else {
           setMessage(`Error: ${res.error}`);
