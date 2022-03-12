@@ -18,10 +18,14 @@ export default function Menu() {
   };
 
   useEffect(() => {
-    const cookies = parseCookies();
-    if (cookies.USER_TOKEN && setUser) {
-      const cookiesJson = JSON.parse(cookies.USER_TOKEN);
-      setUser(cookiesJson);
+    try {
+      const cookies = parseCookies();
+      if (cookies.USER_TOKEN && setUser) {
+        const cookiesJson = JSON.parse(cookies.USER_TOKEN);
+        setUser(cookiesJson);
+      }
+    } catch (error) {
+      console.log(error, logout());
     }
   }, []);
 
@@ -56,7 +60,11 @@ export default function Menu() {
             {user?.token != null && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link active" aria-current="page" to="/dashboard">
+                  <Link
+                    className="nav-link active"
+                    aria-current="page"
+                    to="/dashboard"
+                  >
                     Dashboard
                   </Link>
                 </li>
@@ -76,12 +84,12 @@ export default function Menu() {
                     aria-labelledby="navbarDropdown"
                   >
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <a className="dropdown-item disabled" href="#">
                         Adicionar
                       </a>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <a className="dropdown-item disabled" href="#">
                         Listar
                       </a>
                     </li>
@@ -89,7 +97,7 @@ export default function Menu() {
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
-                      <a className="dropdown-item  disabled" href="#">
+                      <a className="dropdown-item disabled" href="#">
                         Perfil
                       </a>
                     </li>

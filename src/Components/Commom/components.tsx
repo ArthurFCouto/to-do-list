@@ -23,10 +23,12 @@ type SpinnerColor = {
 }
 
 export const SpinnerLoading = (props: SpinnerColor) => {
+  const color = props.color ? props.color : "text-primary";
+
   return (
     <div className="d-flex justify-content-center">
       <div
-        className={"spinner-border spinner-border-sm "+props?.color}
+        className={"spinner-border spinner-border-sm "+color}
         role="status"
       >
         <span className="visually-hidden">Loading...</span>

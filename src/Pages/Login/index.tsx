@@ -2,7 +2,7 @@ import React, { useReducer, useState, useContext } from "react";
 import { setCookie } from "nookies";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import { SectionCenterStyled, SectionStyled } from "../../Components/Commom";
+import { SectionCenterStyled, SectionStyled } from "../../Components/Commom/styles";
 import { ButtonModal } from "../../Components/Commom/components";
 
 export default function Login() {

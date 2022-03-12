@@ -1,7 +1,7 @@
 import React, { useReducer, useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import { SectionCenterStyled, SectionStyled } from "../../Components/Commom";
+import { SectionCenterStyled, SectionStyled } from "../../Components/Commom/styles";
 
 export default function SignIn() {
   const navigate = useNavigate();

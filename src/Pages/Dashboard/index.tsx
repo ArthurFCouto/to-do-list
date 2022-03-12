@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { SectionCenterStyled } from "../../Components/Commom";
+import { SectionCenterStyled } from "../../Components/Commom/styles";
 import { SpinnerLoading } from "../../Components/Commom/components";
 import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";

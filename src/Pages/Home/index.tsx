@@ -1,7 +1,13 @@
-import React, { useContext, useLayoutEffect, useState } from "react";
-import { SectionCenterStyled, SectionStyled } from "../../Components/Commom";
+import React, {
+  useContext,
+  useLayoutEffect,
+  useReducer,
+  useState,
+} from "react";
+import { SectionStyled } from "../../Components/Commom/styles";
 import { UserContext } from "../../Context";
-import { Card, CardBody } from "./components";
+import { Activities, Breadcumb, CardBody, FormIncludeTask } from "./components";
+import api from "../../Services/api";
 
 type Task = {
   check: boolean;
@@ -11,80 +17,190 @@ type Task = {
   task: string;
 };
 
+type BodyInclude = {
+  task: string;
+  deadline: Date;
+};
+
 export default function Home() {
   const { user } = useContext(UserContext);
-  const [listTask, setListTask] = useState([<CardBody body="Verificando tarefas..." border="border-warning" />]);
+  const [taskPending, setTaskPending] = useState([]);
+  const [taskCompleted, setTaskCompleted] = useState([]);
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${user?.token}`,
   };
-
-  function Conclude(id: number) {
-    return fetch(`https://apitasklist.herokuapp.com/task/${id}`, {
-      method: "PUT",
-      headers,
-    })
-      .then((response) => response.status)
+  const [alert, dispatchAlert] = useReducer(Alert, {
+    show: true,
+    message: "Aguarde enquanto carregamos as atividades...",
+    error: "",
+  });
+  function Alert(state: any, action: any) {
+    switch (action.display) {
+      case true:
+        return {
+          show: true,
+          message: action.message,
+          error: action.error,
+        };
+      case false:
+        return {
+          show: false,
+          message: "",
+          error: "",
+        };
+      default:
+        throw new Error();
+    }
+  }
+  async function Conclude(id: number) {
+    return await api
+      .put(`/task/${id}`, {}, { headers })
+      .then((response) => {
+        return response.status;
+      })
       .catch((error) => {
-        console.log(error);
         return error;
       });
   }
-
-  function FillTasks() {
-    fetch(`https://apitasklist.herokuapp.com/task`, {
-      method: "GET",
-      headers,
-    })
-      .then(async (response) => {
-        const res = await response.json();
-        if (response.status === 200) {
-          res.length > 0
-            ? setListTask(
-                res.map((task: Task) => (
-                  <Card
-                    key={task.id}
-                    checkTask={task.check}
-                    create={task.createdAt}
-                    func={(id: number) => Conclude(id)}
-                    deadline={task.deadline}
-                    id={task.id}
-                    task={task.task}
-                  />
-                ))
-              )
-            : setListTask([
-                <CardBody body="Hhmmm Parece que você não tem tarefas cadastradas." />
-              ]);
-        }
+  async function Exclude(id: number) {
+    return await api
+      .delete(`/task/${id}`, { headers })
+      .then((response) => {
+        return response.status;
       })
       .catch((error) => {
-        setListTask([
-          <CardBody body={`Ops! Houve um erro inesperado, tente mais tarde.${<br/>}${error}`} border="border-danger" />
-        ]);
+        return error;
       });
   }
-
+  async function Include(body: BodyInclude) {
+    dispatchAlert({
+      display: true,
+      message: "Aguarde, cadastrando atividade...",
+      error: "",
+    });
+    window.scrollTo(0, 0);
+    await api
+      .post(`/task`, body, { headers })
+      .then(() => {
+        dispatchAlert({
+          display: true,
+          message: "Atividade cadastrada com sucesso!",
+          error: "",
+        });
+        FillTasks();
+      })
+      .catch((error) => {
+        dispatchAlert({
+          display: true,
+          message: "Ops. Houve um erro ao cadastrar atividade.",
+          error: String(error),
+        });
+      });
+  }
+  async function FillTasks() {
+    await api
+      .get("/task", { headers })
+      .then((response) => {
+        dispatchAlert({ display: false });
+        const res = response.data;
+        setTaskCompleted(res.filter((task: Task) => task.check));
+        setTaskPending(res.filter((task: Task) => !task.check));
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatchAlert({
+          display: true,
+          message: "Ops. Houve um erro ao carregar as atividades.",
+          error: String(error),
+        });
+      });
+  }
   useLayoutEffect(() => {
     FillTasks();
   }, []);
 
   return (
-    <div className="container">
-      <SectionCenterStyled>
-        <img
-          src="icon.png"
-          style={{
-            maxWidth: "300px",
-            maxHeight: "185px",
-            height: "auto",
-          }}
-          alt="Bem vindo a sua lista de tarefas!"
+    <>
+      <main className="container">
+        {alert.show && (
+          <SectionStyled>
+            <CardBody border="border-danger">
+              {alert.message}
+              {alert.error != "" && (
+                <>
+                  <br />
+                  {alert.error}
+                </>
+              )}
+            </CardBody>
+          </SectionStyled>
+        )}
+        <Breadcumb
+          title="To-do-list"
+          subTitle="Since 2022"
+          update={() => FillTasks()}
         />
-      </SectionCenterStyled>
-      {listTask.map((card) => (
-        <SectionStyled>{card}</SectionStyled>
-      ))}
-    </div>
+        <div className="my-3 p-3 bg-body rounded shadow-sm">
+          <h6 className="border-bottom pb-2 mb-0">
+            Atividades Pendentes ({taskPending.length})
+          </h6>
+          {taskPending.length > 0
+            ? taskPending
+                .slice(0, 4)
+                .map((task: any) => (
+                  <Activities
+                    key={task.id}
+                    checkTask={task.check}
+                    conclude={(id: number) => Conclude(id)}
+                    create={task.createdAt}
+                    deadline={task.deadline}
+                    exclude={(id: number) => Exclude(id)}
+                    id={task.id}
+                    status="pending"
+                    task={task.task}
+                    updatedAt={task.updatedAt}
+                  />
+                ))
+            : alert.error === "" && (
+                <CardBody>Não há atividades pendentes.</CardBody>
+              )}
+          <small className="d-block text-end mt-3">
+            <a href="#">Todas as Atividades</a>
+          </small>
+        </div>
+        <div className="my-3 p-3 bg-body rounded shadow-sm">
+          <h6 className="border-bottom pb-2 mb-0">Concluidas</h6>
+          {taskCompleted.length > 0
+            ? taskCompleted
+                .slice(0, 5)
+                .map((task: any) => (
+                  <Activities
+                    key={task.id}
+                    checkTask={task.check}
+                    conclude={(id: number) => Conclude(id)}
+                    create={task.createdAt}
+                    deadline={task.deadline}
+                    exclude={(id: number) => Exclude(id)}
+                    id={task.id}
+                    status="completed"
+                    task={task.task}
+                    updatedAt={task.updatedAt}
+                  />
+                ))
+            : alert.error === "" && (
+                <CardBody>Não há atividades completas.</CardBody>
+              )}
+          {taskCompleted.length > 5 && (
+            <small className="d-block text-end mt-3">
+              <a href="#">Todas as Atividades</a>
+            </small>
+          )}
+        </div>
+        <div className="my-3 p-3 bg-body rounded shadow-sm" id="form">
+          <FormIncludeTask fnc={(body: BodyInclude) => Include(body)} />
+        </div>
+      </main>
+    </>
   );
 }
