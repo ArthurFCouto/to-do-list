@@ -2,9 +2,13 @@ import React, { useContext, useEffect } from "react";
 import { parseCookies, destroyCookie } from "nookies";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../Context";
+import { baseUrl } from "../../Config/variables";
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
+
+  const notification = new EventSource(`${baseUrl}/realtimenotification`);
+  notification.addEventListener('notification', (data)=> console.log(data));
 
   const logout = () => {
     if (setUser)
