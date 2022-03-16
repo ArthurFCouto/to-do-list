@@ -7,8 +7,8 @@ import { baseUrl } from "../../Config/variables";
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
 
-  const notification = new EventSource(`${baseUrl}/realtimenotification`);
-  notification.addEventListener('notification', (data)=> console.log(data));
+  const notification = new EventSource(`${baseUrl}/realtimenotification/${user?.token}`);
+  notification.addEventListener("notification", (data) => console.log(data));
 
   const logout = () => {
     if (setUser)

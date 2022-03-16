@@ -208,7 +208,7 @@ export function Breadcumb(props: BreadcumbProps) {
           className="btn btn-primary btn-sm active"
           aria-current="page"
         >
-          Nova Atividade
+          New
         </a>
       </div>
     </div>
