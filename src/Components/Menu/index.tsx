@@ -1,15 +1,17 @@
 import React, { useContext, useEffect } from "react";
 import { parseCookies, destroyCookie } from "nookies";
 import { Link } from "react-router-dom";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { UserContext } from "../../Context";
-import { baseUrl } from "../../Config/variables";
+import Config from "../../Config";
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
-
-  const notification = new EventSource(`${baseUrl}/realtimenotification/${user?.token}`);
-  notification.addEventListener("notification", (data) => console.log(data));
-
+  const { baseUrl } = Config;
+  const headers = {
+    Accept: `text/event-stream`,
+    Authorization: `Bearer ${user?.token}`,
+  };
   const logout = () => {
     if (setUser)
       setUser({
@@ -21,12 +23,37 @@ export default function Menu() {
     destroyCookie(null, "USER_TOKEN");
   };
 
+  function FetchData() {
+    fetchEventSource(`${baseUrl}/notification/realtime`, {
+      method: "GET",
+      headers,
+      async onopen(res) {
+        if (res.ok && res.status === 200) {
+          console.log("Connection made ", res);
+        } else {
+          console.log("Client side error ", res);
+        }
+      },
+      onmessage(event) {
+        const data = JSON.parse(event.data);
+        alert(`${data.title} \n ${data.message}`);
+      },
+      onclose() {
+        console.log("Connection closed by the server");
+      },
+      onerror(err) {
+        console.log("There was an error from server", err);
+      },
+    });
+  };
+
   useEffect(() => {
     try {
       const cookies = parseCookies();
       if (cookies.USER_TOKEN && setUser) {
         const cookiesJson = JSON.parse(cookies.USER_TOKEN);
         setUser(cookiesJson);
+        FetchData();
       }
     } catch (error) {
       console.log(error, logout());

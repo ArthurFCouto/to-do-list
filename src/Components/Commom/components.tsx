@@ -1,3 +1,11 @@
+type SpinnerColor = {
+  color?: "text-primary" | "text-light" | "text-success"
+}
+
+type TextString = {
+text: string;
+};
+
 export const Svg = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" style={{ display: "none" }}>
@@ -18,13 +26,8 @@ export const Svg = () => {
   );
 };
 
-type SpinnerColor = {
-  color?: "text-primary" | "text-light" | "text-success"
-}
-
 export const SpinnerLoading = (props: SpinnerColor) => {
   const color = props.color ? props.color : "text-primary";
-
   return (
     <div className="d-flex justify-content-center">
       <div
@@ -37,11 +40,7 @@ export const SpinnerLoading = (props: SpinnerColor) => {
   );
 };
 
-type text = {
-  text: string;
-};
-
-export function ButtonModal({ text }: text) {
+export function ButtonModal({ text }: TextString) {
   return (
     <button
       type="button"

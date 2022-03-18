@@ -5,9 +5,9 @@ import React, {
   useState,
 } from "react";
 import { SectionStyled } from "../../Components/Commom/styles";
-import { UserContext } from "../../Context";
 import { Activities, Breadcumb, CardBody, FormIncludeTask } from "./components";
 import api from "../../Services/api";
+import { UserContext } from "../../Context";
 
 type Task = {
   check: boolean;
@@ -23,13 +23,12 @@ type BodyInclude = {
 };
 
 export default function Home() {
-  const { user } = useContext(UserContext);
+  const { user: userContext } = useContext(UserContext);
+  const headers = {
+    Authorization: `Bearer ${userContext?.token}`,
+  };
   const [taskPending, setTaskPending] = useState([]);
   const [taskCompleted, setTaskCompleted] = useState([]);
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${user?.token}`,
-  };
   const [alert, dispatchAlert] = useReducer(Alert, {
     show: true,
     message: "Aguarde enquanto carregamos as atividades...",
@@ -55,7 +54,13 @@ export default function Home() {
   }
   async function Conclude(id: number) {
     return await api
-      .put(`/task/${id}`, {}, { headers })
+      .put(
+        `/task/${id}`,
+        {},
+        {
+          headers,
+        }
+      )
       .then((response) => {
         return response.status;
       })
@@ -65,7 +70,9 @@ export default function Home() {
   }
   async function Exclude(id: number) {
     return await api
-      .delete(`/task/${id}`, { headers })
+      .delete(`/task/${id}`, {
+        headers,
+      })
       .then((response) => {
         return response.status;
       })
@@ -81,7 +88,9 @@ export default function Home() {
     });
     window.scrollTo(0, 0);
     await api
-      .post(`/task`, body, { headers })
+      .post(`/task`, body, {
+        headers,
+      })
       .then(() => {
         dispatchAlert({
           display: true,
@@ -94,13 +103,15 @@ export default function Home() {
         dispatchAlert({
           display: true,
           message: "Ops. Houve um erro ao cadastrar atividade.",
-          error: String(error),
+          error: String(error.response),
         });
       });
   }
   async function FillTasks() {
     await api
-      .get("/task", { headers })
+      .get("/task", {
+        headers,
+      })
       .then((response) => {
         dispatchAlert({ display: false });
         const res = response.data;

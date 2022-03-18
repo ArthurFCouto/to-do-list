@@ -1,9 +1,12 @@
 import React from "react";
 import axios from "axios";
-import { baseUrl } from "../Config/variables";
+import Config from "../Config";
 
 const api = axios.create({
-  baseURL: `${baseUrl}`,
+  baseURL: `${Config.baseUrl}`,
+  headers: {
+    "Content-Type": "application/json",
+  }
 });
 
 export default api;

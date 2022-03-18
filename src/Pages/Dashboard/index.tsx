@@ -4,6 +4,7 @@ import { SpinnerLoading } from "../../Components/Commom/components";
 import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";
 import { AcordionItem } from "./components";
+import api from "../../Services/api";
 
 type Task = {
   id: number;
@@ -22,6 +23,9 @@ type User = {
 
 export default function Dashboard() {
   const { user: userContext } = useContext(UserContext);
+  const headers = {
+    Authorization: `Bearer ${userContext?.token}`,
+  };
   const [tasks, setTasks] = useState([]);
   const [listTasks, setListTasks] = useState([
     <tr key={0}>
@@ -40,62 +44,43 @@ export default function Dashboard() {
       <td colSpan={4}>Carregando lista de usuários...</td>
     </tr>,
   ]);
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userContext?.token}`,
-  };
 
-  function FillTasks() {
-    fetch(`https://apitasklist.herokuapp.com/task`, {
-      method: "GET",
-      headers,
-    })
-      .then(async (response) => {
-        const res = await response.json();
-        response.status === 200
-          ? setTasks(res)
-          : setListTasks([
-              <tr key={0}>
-                <th scope="row">0</th>
-                <td>Houve um erro ao carregar as tarefas.</td>
-                <td colSpan={2}>{res.error}</td>
-              </tr>,
-            ]);
+  async function FillTasks() {
+    await api
+      .get(`/task`, {
+        headers,
+      })
+      .then((response) => {
+        const res = response.data;
+        setTasks(res);
       })
       .catch((error) => {
         setListTasks([
           <tr key={0}>
             <th scope="row">0</th>
-            <td>Houve um erro inesperado.</td>
-            <td colSpan={2}>{error}</td>
+            <td>Houve um erro ao carregar as tarefas.</td>
+            <td colSpan={2}>{error.response}</td>
           </tr>,
         ]);
       });
   }
 
-  function FillUser() {
-    fetch(`https://apitasklist.herokuapp.com/user`, {
-      method: "GET",
-      headers,
-    })
-      .then(async (response) => {
-        const res = await response.json();
-        response.status === 200
-          ? setUser(res)
-          : setListUser([
-              <tr key={0}>
-                <th scope="row">0</th>
-                <td>Houve um erro ao carregar os usuarios.</td>
-                <td colSpan={3}>{res.error}</td>
-              </tr>,
-            ]);
+  async function FillUser() {
+    await api
+      .get(`/user`, {
+        headers,
+      })
+      .then((response) => {
+        const res = response.data;
+        setUser(res);
       })
       .catch((error) => {
+        console.log(error.response);
         setListUser([
           <tr key={0}>
             <th scope="row">0</th>
             <td>Houve um erro inesperado.</td>
-            <td colSpan={3}>{error}</td>
+            <td colSpan={3}></td>
           </tr>,
         ]);
       });
@@ -217,9 +202,7 @@ export default function Dashboard() {
           target="-tree"
           title="Informações pessoais"
         >
-          <div className="accordion-body">
-            Ainda não implementado.
-          </div>
+          <div className="accordion-body">Ainda não implementado.</div>
         </AcordionItem>
       </div>
     </div>
