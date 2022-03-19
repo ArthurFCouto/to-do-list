@@ -72,6 +72,7 @@ export default function Login() {
         if (response.status === 200) {
           const { user, token } = res;
           const obj = {
+            id: user.id,
             email: body.email,
             name: user.name,
             password: body.password,
@@ -95,7 +96,7 @@ export default function Login() {
       .catch((error) => {
         console.log(error);
         dispatchAlter({ status: 500 });
-        setMessage("Houve um erro inesperado. Tente novamente.");
+        setMessage("Houve um erro inesperado. Tente novamente mais tarde.");
       });
   };
 

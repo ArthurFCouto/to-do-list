@@ -2,6 +2,7 @@
 import React, { useState, createContext } from "react";
 
 interface User {
+    id: number | null
     email: string | null;
     name: string | null;
     password: string | null;
@@ -21,6 +22,7 @@ export const UserContext = createContext<Partial<Context>>({}); //Exportamos o n
 
 function UserProvider({ children }: Props) {
   const [user, setUser] = useState({
+    id: null,
     email: null,
     name: null,
     password: null,

@@ -15,6 +15,7 @@ export default function Menu() {
   const logout = () => {
     if (setUser)
       setUser({
+        id: null,
         email: null,
         name: null,
         password: null,
@@ -23,7 +24,8 @@ export default function Menu() {
     destroyCookie(null, "USER_TOKEN");
   };
 
-  function FetchData() {
+  useEffect(() => {
+    console.log(user);
     fetchEventSource(`${baseUrl}/notification/realtime`, {
       method: "GET",
       headers,
@@ -45,7 +47,7 @@ export default function Menu() {
         console.log("There was an error from server", err);
       },
     });
-  };
+  }, [user]);
 
   useEffect(() => {
     try {
@@ -53,7 +55,6 @@ export default function Menu() {
       if (cookies.USER_TOKEN && setUser) {
         const cookiesJson = JSON.parse(cookies.USER_TOKEN);
         setUser(cookiesJson);
-        FetchData();
       }
     } catch (error) {
       console.log(error, logout());
