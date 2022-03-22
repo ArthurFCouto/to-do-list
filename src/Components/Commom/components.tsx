@@ -1,9 +1,9 @@
 type SpinnerColor = {
-  color?: "text-primary" | "text-light" | "text-success"
-}
+  color?: "text-primary" | "text-light" | "text-success";
+};
 
 type TextString = {
-text: string;
+  text: string;
 };
 
 export const Svg = () => {
@@ -31,7 +31,7 @@ export const SpinnerLoading = (props: SpinnerColor) => {
   return (
     <div className="d-flex justify-content-center">
       <div
-        className={"spinner-border spinner-border-sm "+color}
+        className={"spinner-border spinner-border-sm " + color}
         role="status"
       >
         <span className="visually-hidden">Loading...</span>
@@ -53,3 +53,30 @@ export function ButtonModal({ text }: TextString) {
     </button>
   );
 }
+
+export const Toast = () => {
+  return (
+    <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+      <div
+        id="liveToast"
+        className="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div className="toast-header">
+          <img src="..." className="rounded me-2" alt="..." />
+          <strong className="me-auto">Bootstrap</strong>
+          <small>11 mins ago</small>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="toast-body">Hello, world! This is a toast message.</div>
+      </div>
+    </div>
+  );
+};

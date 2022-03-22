@@ -1,12 +1,14 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { parseCookies, destroyCookie } from "nookies";
 import { Link } from "react-router-dom";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { UserContext } from "../../Context";
 import Config from "../../Config";
+import api from "../../Services/api";
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
+  const [notify, setNotify] = useState(0);
   const { baseUrl } = Config;
   const headers = {
     Accept: `text/event-stream`,
@@ -24,8 +26,16 @@ export default function Menu() {
     destroyCookie(null, "USER_TOKEN");
   };
 
+  async function Notification() {
+    await api.get("/notification", { headers })
+      .then((response)=> {
+        const unread = response.data.filter((notify: any)=> (!notify.read));
+        setNotify(unread.length);
+      })
+      .catch((error)=> console.log(error));
+  }
+
   useEffect(() => {
-    console.log(user);
     fetchEventSource(`${baseUrl}/notification/realtime`, {
       method: "GET",
       headers,
@@ -38,7 +48,8 @@ export default function Menu() {
       },
       onmessage(event) {
         const data = JSON.parse(event.data);
-        alert(`${data.title} \n ${data.message}`);
+        console.log(data);
+        Notification();
       },
       onclose() {
         console.log("Connection closed by the server");
@@ -56,6 +67,7 @@ export default function Menu() {
         const cookiesJson = JSON.parse(cookies.USER_TOKEN);
         setUser(cookiesJson);
       }
+      Notification();
     } catch (error) {
       console.log(error, logout());
     }
@@ -140,6 +152,17 @@ export default function Menu() {
           </ul>
           {user?.token != null && (
             <form className="d-flex">
+              <button
+                type="button"
+                className="btn btn-outline-primary position-relative"
+                style={{ marginRight: "10px" }}
+              >
+                New
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {notify}
+                  <span className="visually-hidden">unread messages</span>
+                </span>
+              </button>
               <input
                 className="form-control me-2"
                 type="search"

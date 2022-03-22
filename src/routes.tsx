@@ -7,7 +7,7 @@ import SignIn from "./Pages/SignIn";
 import Dashboard from "./Pages/Dashboard";
 import Menu from "./Components/Menu";
 import Modal from "./Components/Modal";
-import { Svg } from "./Components/Commom/components";
+import { Svg, Toast } from "./Components/Commom/components";
 import Home from "./Pages/Home";
 
 //Conferir: https://github.com/remix-run/react-router/blob/main/docs/getting-started/tutorial.md
@@ -20,6 +20,7 @@ const RoutesPerson = () => {
       <Menu />
       <Svg />
       <Modal />
+      <Toast />
       <Routes>
         <Route path="/" element={user?.token == null ? <Login /> : <Home />} />
         <Route path="/dashboard" element={user?.token == null ? <Login /> : <Dashboard />} />
