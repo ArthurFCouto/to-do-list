@@ -6,9 +6,10 @@ import Login from "./Pages/Login";
 import SignIn from "./Pages/SignIn";
 import Dashboard from "./Pages/Dashboard";
 import Menu from "./Components/Menu";
-import Modal from "./Components/Modal";
-import { Svg, Toast } from "./Components/Commom/components";
 import Home from "./Pages/Home";
+import Modal from "./Components/Modal";
+import Toast from "./Components/Toast";
+import { Svg } from "./Components/Commom/components";
 
 //Conferir: https://github.com/remix-run/react-router/blob/main/docs/getting-started/tutorial.md
 //Houve mudança no modo de utilização

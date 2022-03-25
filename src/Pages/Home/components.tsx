@@ -201,14 +201,14 @@ export function Breadcumb(props: BreadcumbProps) {
       </div>
       <div className="btn-group">
         <a onClick={() => props.update()} className="btn btn-primary btn-sm">
-          Update
+          <i className="bi bi-arrow-clockwise"></i>
         </a>
         <a
           href="#form"
           className="btn btn-primary btn-sm active"
           aria-current="page"
         >
-          New
+          <i className="bi bi-file-earmark-plus"></i>
         </a>
       </div>
     </div>

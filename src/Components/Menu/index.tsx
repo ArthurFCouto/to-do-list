@@ -1,14 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
-import { parseCookies, destroyCookie } from "nookies";
 import { Link } from "react-router-dom";
+import { parseCookies, destroyCookie } from "nookies";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { UserContext } from "../../Context";
+import { NavItemLogin, ToggleIcon } from "./components";
 import Config from "../../Config";
 import api from "../../Services/api";
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
-  const [notify, setNotify] = useState(0);
+  const [countUnread, setCountUnread] = useState(0);
+  const [notifications, setNotifications] = useState<Array<Element>>();
   const { baseUrl } = Config;
   const headers = {
     Accept: `text/event-stream`,
@@ -26,14 +28,27 @@ export default function Menu() {
     destroyCookie(null, "USER_TOKEN");
   };
 
-  async function Notification() {
-    await api.get("/notification", { headers })
-      .then((response)=> {
-        const unread = response.data.filter((notify: any)=> (!notify.read));
-        setNotify(unread.length);
+  const Notification = async () => {
+    await api
+      .get("/notification", { headers })
+      .then((response) => {
+        const unread = response.data.filter((notify: any) => !notify.read);
+        setCountUnread(unread.length);
+        setNotifications(
+          response.data
+            .reverse()
+            .slice(0, 5)
+            .map((notify: any) => (
+              <li>
+                <a className="dropdown-item" href="#">
+                  {notify.read ? notify.title : <strong>{notify.title}</strong>}
+                </a>
+              </li>
+            ))
+        );
       })
-      .catch((error)=> console.log(error));
-  }
+      .catch((error) => console.log(error));
+  };
 
   useEffect(() => {
     fetchEventSource(`${baseUrl}/notification/realtime`, {
@@ -48,8 +63,8 @@ export default function Menu() {
       },
       onmessage(event) {
         const data = JSON.parse(event.data);
-        console.log(data);
         Notification();
+        console.log(data);
       },
       onclose() {
         console.log("Connection closed by the server");
@@ -58,16 +73,14 @@ export default function Menu() {
         console.log("There was an error from server", err);
       },
     });
+    Notification();
   }, [user]);
 
   useEffect(() => {
     try {
       const cookies = parseCookies();
-      if (cookies.USER_TOKEN && setUser) {
-        const cookiesJson = JSON.parse(cookies.USER_TOKEN);
-        setUser(cookiesJson);
-      }
-      Notification();
+      if (cookies.USER_TOKEN && setUser)
+        setUser(JSON.parse(cookies.USER_TOKEN));
     } catch (error) {
       console.log(error, logout());
     }
@@ -88,17 +101,7 @@ export default function Menu() {
         <Link className="navbar-brand" to="/">
           To do List
         </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+        <ToggleIcon />
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             {user?.token != null && (
@@ -120,29 +123,29 @@ export default function Menu() {
                     role="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
+                    style={{ position: "relative" }}
                   >
-                    Opções
+                    <i className="bi bi-bell"></i>&nbsp;
+                    <span
+                      className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
+                        countUnread === 0 ? "bg-secondary" : "bg-danger"
+                      }`}
+                    >
+                      {countUnread}
+                      <span className="visually-hidden">unread messages</span>
+                    </span>
                   </a>
                   <ul
                     className="dropdown-menu"
                     aria-labelledby="navbarDropdown"
                   >
-                    <li>
-                      <a className="dropdown-item disabled" href="#">
-                        Adicionar
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item disabled" href="#">
-                        Listar
-                      </a>
-                    </li>
+                    {notifications}
                     <li>
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
                       <a className="dropdown-item disabled" href="#">
-                        Perfil
+                        Ver todas
                       </a>
                     </li>
                   </ul>
@@ -150,43 +153,11 @@ export default function Menu() {
               </>
             )}
           </ul>
-          {user?.token != null && (
-            <form className="d-flex">
-              <button
-                type="button"
-                className="btn btn-outline-primary position-relative"
-                style={{ marginRight: "10px" }}
-              >
-                New
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {notify}
-                  <span className="visually-hidden">unread messages</span>
-                </span>
-              </button>
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Tarefas..."
-                aria-label="Search"
-              />
-              <button className="btn btn-outline-success" type="submit">
-                Buscar
-              </button>
-            </form>
-          )}
           <ul className="navbar-nav mb-2 mb-lg-0" style={{ cursor: "pointer" }}>
             {user?.token == null ? (
-              <li className="nav-item">
-                <Link className="nav-link active" to="/login">
-                  Login
-                </Link>
-              </li>
+              <NavItemLogin text="Login" />
             ) : (
-              <li className="nav-item" onClick={() => logout()}>
-                <Link className="nav-link  active" to="/login">
-                  Sair
-                </Link>
-              </li>
+              <NavItemLogin text="Sair" func={() => logout()} />
             )}
           </ul>
         </div>

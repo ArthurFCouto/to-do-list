@@ -21,6 +21,14 @@ type User = {
   updatedAt: string;
 };
 
+type Notification = {
+  id: number;
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+};
+
 export default function Dashboard() {
   const { user: userContext } = useContext(UserContext);
   const headers = {
@@ -44,6 +52,29 @@ export default function Dashboard() {
       <td colSpan={4}>Carregando lista de usuários...</td>
     </tr>,
   ]);
+  const [notifications, setNotifications] = useState([]);
+  const [listNotifications, setListNotifications] = useState([
+    <tr key={0}>
+      <th scope="row">
+        <SpinnerLoading />
+      </th>
+      <td colSpan={5}>Carregando lista de notifications...</td>
+    </tr>,
+  ]);
+
+  const DeleteNotification = async (id: number) => {
+    await api
+      .delete(`/notification/${id}`, { headers })
+      .then(() => FillNotifications())
+      .catch((error) => console.log(error));
+  };
+
+  const ReadNotification = async (id: number) => {
+    await api
+      .put(`/notification/${id}`, {}, { headers })
+      .then(() => FillNotifications())
+      .catch((error) => console.log(error));
+  };
 
   async function FillTasks() {
     await api
@@ -77,6 +108,27 @@ export default function Dashboard() {
       .catch((error) => {
         console.log(error.response);
         setListUser([
+          <tr key={0}>
+            <th scope="row">0</th>
+            <td>Houve um erro inesperado.</td>
+            <td colSpan={3}></td>
+          </tr>,
+        ]);
+      });
+  }
+
+  async function FillNotifications() {
+    await api
+      .get(`/notification`, {
+        headers,
+      })
+      .then((response) => {
+        const res = response.data;
+        setNotifications(res);
+      })
+      .catch((error) => {
+        console.log(error.response);
+        setListNotifications([
           <tr key={0}>
             <th scope="row">0</th>
             <td>Houve um erro inesperado.</td>
@@ -135,6 +187,37 @@ export default function Dashboard() {
         ]);
   }, [user]);
 
+  useEffect(() => {
+    notifications.length > 0
+      ? setListNotifications(
+          notifications.map((notify: Notification) => (
+            <tr key={notify.id}>
+              <th scope="row">{notify.id}</th>
+              <td>{notify.title}</td>
+              <td>{notify.message}</td>
+              <td>{FormatDateBR(notify.createdAt)}</td>
+              <td>{String(notify.read)}</td>
+              <td>
+                <i
+                  className="bi bi-trash3"
+                  onClick={() => DeleteNotification(notify.id)}
+                ></i>
+                <i className="bi bi-check2-all" onClick={() => ReadNotification(notify.id)}></i>
+              </td>
+            </tr>
+          ))
+        )
+      : setListNotifications([
+          <tr key={0}>
+            <th scope="row">0</th>
+            <td>Não há notificações para exibir.</td>
+            <td colSpan={4}>
+              <SpinnerLoading />
+            </td>
+          </tr>,
+        ]);
+  }, [notifications]);
+
   return (
     <div className="container">
       <SectionCenterStyled>
@@ -175,10 +258,33 @@ export default function Dashboard() {
           </div>
         </AcordionItem>
         <AcordionItem
-          func={() => FillUser()}
+          func={() => FillNotifications()}
           id="two"
           idParent="accordion"
           target="-two"
+          title={"Gerenciar notificações"}
+        >
+          <div className="accordion-body">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">#ID</th>
+                  <th scope="col">Titulo</th>
+                  <th scope="col">Detalhes</th>
+                  <th scope="col">Criação</th>
+                  <th scope="col">Lida</th>
+                  <th scope="col">Opções</th>
+                </tr>
+              </thead>
+              <tbody>{listNotifications}</tbody>
+            </table>
+          </div>
+        </AcordionItem>
+        <AcordionItem
+          func={() => FillUser()}
+          id="tree"
+          idParent="accordion"
+          target="-tree"
           title={"Gerenciar usuários"}
         >
           <div className="accordion-body">
@@ -197,9 +303,9 @@ export default function Dashboard() {
           </div>
         </AcordionItem>
         <AcordionItem
-          id="tree"
+          id="four"
           idParent="accordion"
-          target="-tree"
+          target="-four"
           title="Informações pessoais"
         >
           <div className="accordion-body">Ainda não implementado.</div>

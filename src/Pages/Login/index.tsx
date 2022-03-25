@@ -144,7 +144,7 @@ export default function Login() {
                   required
                 />
               </div>
-              <ButtonModal text="Esqueci a senha" />
+              {/*<ButtonModal text="Esqueci a senha" />*/}
             </div>
           </div>
           <div className="mb-3 form-check">

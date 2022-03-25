@@ -1,29 +1,4 @@
-const recovery = (
-  <>
-    <div className="mb-3 row">
-      <label htmlFor="staticEmail" className="col-sm-2 col-form-label">
-        Email
-      </label>
-      <div className="col-sm-10">
-        <input
-          type="text"
-          readOnly
-          className="form-control-plaintext"
-          id="staticEmail"
-          value="email@example.com"
-        />
-      </div>
-    </div>
-    <div className="mb-3 row">
-      <label htmlFor="inputPassword" className="col-sm-2 col-form-label">
-        Password
-      </label>
-      <div className="col-sm-10">
-        <input type="password" className="form-control" id="inputPassword" />
-      </div>
-    </div>
-  </>
-);
+//Implantar futuramente
 
 export default function Modal() {
   return (
@@ -38,7 +13,7 @@ export default function Modal() {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="exampleModalLabel">
-              Esqueci a senha
+              TITLE
             </h5>
             <button
               type="button"
@@ -47,9 +22,7 @@ export default function Modal() {
               aria-label="Close"
             ></button>
           </div>
-          <div className="modal-body">
-            Ainda em implementação
-          </div>
+          <div className="modal-body">BODY</div>
           <div className="modal-footer">
             <button
               type="button"
@@ -59,7 +32,7 @@ export default function Modal() {
               Fechar
             </button>
             <button type="button" className="btn btn-primary">
-              Salvar
+              Continuar
             </button>
           </div>
         </div>
