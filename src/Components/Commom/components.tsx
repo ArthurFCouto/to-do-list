@@ -2,10 +2,6 @@ type SpinnerColor = {
   color?: "text-primary" | "text-light" | "text-success";
 };
 
-type TextString = {
-  text: string;
-};
-
 export const Svg = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" style={{ display: "none" }}>
@@ -39,17 +35,3 @@ export const SpinnerLoading = (props: SpinnerColor) => {
     </div>
   );
 };
-
-export const ButtonModal = (text: TextString)=> {
-  return (
-    <button
-      type="button"
-      className="col-sm-2 btn btn-link"
-      data-bs-toggle="modal"
-      data-bs-target="#exampleModal"
-      style={{ width: "auto" }}
-    >
-      {text}
-    </button>
-  );
-}

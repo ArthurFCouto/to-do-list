@@ -2,14 +2,13 @@ import React, { useReducer, useState, useContext } from "react";
 import { setCookie } from "nookies";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import { SectionCenterStyled, SectionStyled } from "../../Components/Commom/styles";
-import { ButtonModal } from "../../Components/Commom/components";
+import api from "../../Services/api";
 
 export default function Login() {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
-  const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState("");
+  const [visible, setVisible] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
   const [alterClass, dispatchAlter] = useReducer(Alter, {
     class: "alert-primary",
     aria: "Info:",
@@ -48,7 +47,7 @@ export default function Login() {
     }
   }
 
-  const Login = (e: any) => {
+  const Login = async (e: any) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const body = {
@@ -59,125 +58,112 @@ export default function Login() {
     dispatchAlter({ status: "info" });
     setMessage("Aguarde, validando seus dados...");
     setVisible(true);
-    fetch(`https://apitasklist.herokuapp.com/session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then(async (response) => {
-        const res = await response.json();
+    await api
+      .post("/session", body, {})
+      .then((response) => {
         dispatchAlter({ status: response.status });
-        if (response.status === 200) {
-          const { user, token } = res;
-          const obj = {
-            id: user.id,
-            email: body.email,
-            name: user.name,
-            password: body.password,
-            token,
-          };
-          if (setUser)
-            setUser(obj);
-          setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
-          if (body.remember) {
-            const cookie = JSON.stringify(obj);
-            setCookie(null, "USER_TOKEN", cookie, {
-              maxAge: 604800,
-              path: "/",
-            });
-          }
-          navigate("/");
-        } else {
-          setMessage(`Error: ${res.error}`);
-        }
+        const { user, token } = response.data;
+        const newUser = {
+          id: user.id,
+          email: body.email,
+          name: user.name,
+          password: body.password,
+          token,
+        };
+        if (setUser) setUser(newUser);
+        setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
+        if (body.remember)
+          setCookie(null, "USER_TOKEN", JSON.stringify(newUser), {
+            maxAge: 604800,
+            path: "/",
+          });
+        setTimeout(() => navigate("/"), 1000);
       })
       .catch((error) => {
-        console.log(error);
-        dispatchAlter({ status: 500 });
-        setMessage("Houve um erro inesperado. Tente novamente mais tarde.");
+        const { status, data } = error.response;
+        dispatchAlter({ status });
+        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
       });
   };
 
   return (
     <div className="container">
-      <SectionCenterStyled>
-        <img
-          src="login.png"
-          style={{
-            maxWidth: "300px",
-            maxHeight: "185px",
-            height: "auto",
-          }}
-          alt="Faça login ou cadastre-se"
-        />
-      </SectionCenterStyled>
-      <SectionStyled>
-        <h4>Entre com sua conta</h4>
-      </SectionStyled>
-      <SectionStyled>
-        <form onSubmit={(e) => Login(e)}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email
-            </label>
-            <input
-              type="email"
-              className="form-control"
-              id="email"
-              name="email"
-              required
+      <div className="col-xxl-8 px-4 py-5">
+        <div className="row flex-lg-row-reverse align-items-center g-5">
+          <div className="col-10 col-sm-8 col-lg-6 mx-auto">
+            <img
+              src="images/login.png"
+              className="d-block mx-lg-auto img-fluid"
+              alt="Login"
+              width="700"
+              height="500"
+              loading="lazy"
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <div className="row mb-3">
-              <div className="col">
+          <div className="col-lg-6">
+            <form onSubmit={(e) => Login(e)}>
+              <h1 className="h3 mb-3 fw-normal">Entre com sua conta</h1>
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
                 <input
-                  type="password"
+                  type="email"
                   className="form-control"
-                  id="password"
-                  name="password"
+                  id="email"
+                  name="email"
                   required
                 />
               </div>
-              {/*<ButtonModal text="Esqueci a senha" />*/}
-            </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <div className="row mb-3">
+                  <div className="col">
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="password"
+                      name="password"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="remember"
+                  name="remember"
+                />
+                <label className="form-check-label" htmlFor="remember">
+                  Manter sessão aberta
+                </label>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "10px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-light"
+                  onClick={() => navigate("/sign-in")}
+                >
+                  Cadastre-se
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Entrar
+                </button>
+              </div>
+            </form>
           </div>
-          <div className="mb-3 form-check">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="remember"
-              name="remember"
-            />
-            <label className="form-check-label" htmlFor="remember">
-              Manter sessão aberta
-            </label>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              columnGap: "10px",
-              justifyContent: "flex-end",
-            }}
-          >
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={() => navigate("/sign-in")}
-            >
-              Cadastre-se
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Entrar
-            </button>
-          </div>
-        </form>
-      </SectionStyled>
+        </div>
+      </div>
       {visible && (
         <div
           className={`alert ${alterClass.class} d-flex align-items-center`}

@@ -1,7 +1,7 @@
 import React, { useReducer, useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import { SectionCenterStyled, SectionStyled } from "../../Components/Commom/styles";
+import api from "../../Services/api";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -49,71 +49,32 @@ export default function SignIn() {
     }
   }
 
-  function Redirect(body: object) {
-    fetch(`https://apitasklist.herokuapp.com/session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then(async (response) => {
-        const res = await response.json();
+  async function Redirect(body: object) {
+    await api
+      .post("/session", body, {})
+      .then((response) => {
         dispatchAlter({ status: response.status });
-        if (response.status === 200) {
-          const { token } = res;
-          if (setUser)
-            setUser({
-              email: email,
-              password: password,
-              token,
-            });
-          setTimeout(()=>navigate("/"), 800);
-        } else {
-          setMessage(`Error: ${res.error}`);
-        }
+        const { user, token } = response.data;
+        if (setUser)
+          setUser({
+            id: user.id,
+            email: email,
+            name: user.name,
+            password: password,
+            token,
+          });
+        setTimeout(() => navigate("/"), 1000);
       })
       .catch((error) => {
-        console.log(error);
-        dispatchAlter({ status: 500 });
-        setMessage("Houve um erro inesperado, tente mais tarde.");
+        const { status, data } = error.response;
+        dispatchAlter({ status });
+        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
       });
   }
 
-  const Alert = () => {
-    return (
-      <div
-        className={`alert ${alterClass.class} d-flex align-items-center`}
-        role="alert"
-        style={{ position: "relative" }}
-      >
-        <svg
-          className="bi flex-shrink-0 me-2"
-          width="24"
-          height="24"
-          role="img"
-          aria-label={alterClass.aria}
-        >
-          <use xlinkHref={alterClass.icon} />
-        </svg>
-        <div>{message}</div>
-        <button
-          type="button"
-          className="btn-close"
-          aria-label="Close"
-          style={{ 
-            right: "10px",
-            position: "absolute"
-          }}
-          onClick={() => setVisible(false)}
-        />
-      </div>
-    );
-  };
-
-  const Register = (e: FormEvent) => {
+  const Register = async (e: FormEvent) => {
     e.preventDefault();
-    window.scrollTo(0, 0);
+    //window.scrollTo(0, 0);
     setMessage("Aguarde, validando seus dados...");
     dispatchAlter({ status: "info" });
     setVisible(true);
@@ -122,112 +83,128 @@ export default function SignIn() {
       email: email,
       password: password,
     };
-    fetch(`https://apitasklist.herokuapp.com/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then(async (response) => {
-        const res = await response.json();
+    api
+      .post("user", body, {})
+      .then((response) => {
         dispatchAlter({ status: response.status });
-        if (response.status === 200) {
-          setMessage(`Bem vindo (a) ${name}! Redirecionando...`);
-          Redirect(body);
-        } else {
-          setMessage(`Error: ${res.error}`);
-        }
+        setMessage(`Bem vindo (a) ${name}! Redirecionando...`);
+        Redirect(body);
       })
       .catch((error) => {
-        console.log(error);
-        dispatchAlter({ status: 500 });
-        setMessage("Houve um erro inesperado, tente mais tarde.");
+        const { status, data } = error.response;
+        dispatchAlter({ status });
+        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
       });
   };
 
   return (
-      <div className="container">
-        <SectionCenterStyled>
-          <img
-            src="signin.png"
-            style={{
-              maxWidth: "300px",
-              maxHeight: "185px",
-              height: "auto",
-            }}
-            alt="Cadastre-se"
-          />
-        </SectionCenterStyled>
-        {
-          visible && Alert()
-        }
-        <SectionStyled>
-          <h4>Cadastre-se</h4>
-        </SectionStyled>
-        <SectionStyled>
-          <form onSubmit={(e) => Register(e)}>
-            <div className="row mb-3">
-              <label htmlFor="name" className="col-sm-2 col-form-label">
-                Nome
-              </label>
-              <div className="col-sm-10">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  required
-                  onChange={(e) => setName(e.target.value)}
-                />
+    <div className="container">
+      <div className="col-xxl-8 px-4 py-5">
+        <div className="row flex-lg-row-reverse align-items-center g-5">
+          <div className="col-10 col-sm-8 col-lg-6 mx-auto">
+            <img
+              src="images/signin.png"
+              className="d-block mx-lg-auto img-fluid"
+              alt="Login"
+              width="700"
+              height="500"
+              loading="lazy"
+            />
+          </div>
+          <div className="col-lg-6">
+            <form onSubmit={(e) => Register(e)}>
+              <h1 className="h3 mb-3 fw-normal">Cadastre-se</h1>
+              <div className="row mb-3">
+                <label htmlFor="name" className="col-sm-2 col-form-label">
+                  Nome
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    required
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="row mb-3">
-              <label htmlFor="email" className="col-sm-2 col-form-label">
-                Email
-              </label>
-              <div className="col-sm-10">
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  required
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+              <div className="row mb-3">
+                <label htmlFor="email" className="col-sm-2 col-form-label">
+                  Email
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="email"
+                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="row mb-3">
-              <label htmlFor="password" className="col-sm-2 form-label">
-                Senha
-              </label>
-              <div className="col-sm-10">
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              <div className="row mb-3">
+                <label htmlFor="password" className="col-sm-2 form-label">
+                  Senha
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="mb-3 form-text" style={{ textAlign: "end" }}>
-              Fique tranquilo, nunca compartilharemos seus dados.
-            </div>
-            <div
-              style={{
-                display: "flex",
-                columnGap: "10px",
-                justifyContent: "flex-end",
-              }}
-            >
-              <button type="reset" className="btn btn-light">
-                Limpar
-              </button>
-              <button type="submit" className="btn btn-primary">
-                Cadastrar
-              </button>
-            </div>
-          </form>
-        </SectionStyled>
+              <div className="mb-3 form-text" style={{ textAlign: "end" }}>
+                Fique tranquilo, nunca compartilharemos seus dados.
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "10px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button type="reset" className="btn btn-light">
+                  Limpar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Cadastrar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
+      {visible && (
+        <div
+          className={`alert ${alterClass.class} d-flex align-items-center`}
+          role="alert"
+          style={{ position: "relative" }}
+        >
+          <svg
+            className="bi flex-shrink-0 me-2"
+            width="24"
+            height="24"
+            role="img"
+            aria-label={alterClass.aria}
+          >
+            <use xlinkHref={alterClass.icon} />
+          </svg>
+          <div>{message}</div>
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            style={{
+              right: "10px",
+              position: "absolute",
+            }}
+            onClick={() => setVisible(false)}
+          />
+        </div>
+      )}
+    </div>
   );
 }

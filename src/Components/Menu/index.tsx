@@ -91,7 +91,7 @@ export default function Menu() {
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
           <img
-            src="icon.png"
+            src="images/icon.png"
             alt="X"
             width="30"
             height="30"
@@ -127,12 +127,11 @@ export default function Menu() {
                   >
                     <i className="bi bi-bell"></i>&nbsp;
                     <span
-                      className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
-                        countUnread === 0 ? "bg-secondary" : "bg-danger"
+                      className={`badge bg-secondary ${
+                        countUnread == 0 ? "bg-secondary" : "bg-danger"
                       }`}
                     >
                       {countUnread}
-                      <span className="visually-hidden">unread messages</span>
                     </span>
                   </a>
                   <ul

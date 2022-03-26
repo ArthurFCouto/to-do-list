@@ -1,34 +1,34 @@
-//Observações para o context com typescript
+//Contém comentários com observações para o uso do useContext com typescript
 import React, { useState, createContext } from "react";
 
+//Serão variáveis de contexto o user(objeto) e setUser(função)
+
+//Definição da interface(modelo) que será o objeto user
 interface User {
     id: number | null
     email: string | null;
     name: string | null;
     password: string | null;
     token: string | null;
-}; //Criamos a interface, modelo que será o nosso objeto user
+};
 
+//Definição do tipo do contexto, informando as variáveis/funções que poderão ser acessadas
 type Context = {
     user: User;
     setUser: React.Dispatch<any>;
-} //Criamos o tipo que será o nosso contexto, o que poderá ser acessado por ele
+}
 
+//Feita a exportação do contexto com o tipo definido acima (o uso do Partial é para criar um contexto nulo/vazio)
+export const UserContext = createContext<Partial<Context>>({}); 
+
+//Criação do tipo props para poder receber o children
 type Props = {
   children: React.ReactNode
-} //Criamos um tipo props para podermos receber o filhos do componente
+}
 
-export const UserContext = createContext<Partial<Context>>({}); //Exportamos o nosso contexto que tem que ser do tipo definido acima, e usamos o Partial para criar um contexto vazio
-
-function UserProvider({ children }: Props) {
-  const [user, setUser] = useState({
-    id: null,
-    email: null,
-    name: null,
-    password: null,
-    token: null,
-  });
-  //Como usei o Partial, antes de utilizar os values passados, preciso verificar se eles existem.
+function UserProvider({children}: Props) {
+  //Como foi utilizado o Partial, ao acessar as variáveis do contexto é preciso verificar se não são nulas
+  const [user, setUser] = useState<User>();
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
