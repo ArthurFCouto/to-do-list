@@ -7,7 +7,7 @@ type NavItemProps = {
 export const NavItemLogin = ({ func, text }: NavItemProps) => (
   <li className="nav-item" onClick={func}>
     <Link className="nav-link  active" to="/login">
-      {text}
+    <i className="bi bi-people" />&nbsp;{text}
     </Link>
   </li>
 );

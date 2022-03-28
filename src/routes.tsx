@@ -9,8 +9,6 @@ import NotFound from "./Pages/NotFound";
 import SignIn from "./Pages/SignIn";
 import Unauthorized from "./Pages/Unauthorized";
 import Menu from "./Components/Menu";
-import Modal from "./Components/Modal";
-import Toast from "./Components/Toast";
 import { Svg } from "./Components/Commom/components";
 
 //Conferir: https://github.com/remix-run/react-router/blob/main/docs/getting-started/tutorial.md
@@ -22,8 +20,6 @@ const FullRoutes = () => {
     <BrowserRouter>
       <Menu />
       <Svg />
-      <Modal />
-      <Toast />
       <Routes>
         <Route path="/" element={user?.token == null ? <Unauthorized /> : <Home />} />
         <Route path="/dashboard" element={user?.token == null ? <Unauthorized /> : <Dashboard />} />

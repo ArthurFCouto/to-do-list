@@ -51,7 +51,7 @@ export default function Menu() {
   };
 
   useEffect(() => {
-    fetchEventSource(`${baseUrl}/notification/realtime`, {
+    /*fetchEventSource(`${baseUrl}/notification/realtime`, {
       method: "GET",
       headers,
       async onopen(res) {
@@ -72,8 +72,8 @@ export default function Menu() {
       onerror(err) {
         console.log("There was an error from server", err);
       },
-    });
-    Notification();
+    });*/
+    //Notification();
   }, [user]);
 
   useEffect(() => {

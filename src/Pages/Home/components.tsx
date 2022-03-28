@@ -70,7 +70,11 @@ export function Activities({
         if (response === 200) {
           dispatchAlterClass({ status: "primary" });
           setCheck(true);
-        } else alert("Houve um erro ao concluir a tarefa. " + response);
+        } else
+          alert(
+            "Houve um erro ao concluir a tarefa. " +
+              response.response.data.error
+          );
       }
     } else if (mode == "exclude") {
       if (exclude != null) {
@@ -79,7 +83,10 @@ export function Activities({
           dispatchAlterClass({ status: "primary" });
           setCheck(true);
           setDeleted(true);
-        } else alert("Houve um erro ao excluir a tarefa. " + response);
+        } else
+          alert(
+            "Houve um erro ao excluir a tarefa. " + response.response.data.error
+          );
       }
     }
     setLoading(false);
@@ -87,7 +94,7 @@ export function Activities({
   const pending = (
     <div className="d-flex justify-content-between">
       <strong className="d-block text-gray-dark">
-        {`${id}@${FormatDateBR(deadline)}`}
+        <i className="bi bi-calendar" />{` ${FormatDateBR(deadline)}`}
       </strong>
       {!check ? (
         <a
@@ -98,7 +105,9 @@ export function Activities({
           {loading ? <SpinnerLoading color="text-primary" /> : "Concluir"}
         </a>
       ) : (
-        <a>Concluida</a>
+        <a title="Já concluída">
+          <i className="bi bi-check-square" />
+        </a>
       )}
     </div>
   );
@@ -116,7 +125,9 @@ export function Activities({
           {loading ? <SpinnerLoading color="text-primary" /> : "Excluir"}
         </a>
       ) : (
-        <a>Excluida</a>
+        <a title="Já excluída">
+          <i className="bi bi-trash3" />
+        </a>
       )}
     </div>
   );
@@ -168,7 +179,6 @@ type CardBodyProps = {
   children: React.ReactNode;
   border?: "border-warning" | "border-danger";
 };
-
 export function CardBody(props: CardBodyProps) {
   return (
     <div className={"card " + props?.border}>
@@ -181,15 +191,15 @@ type BreadcumbProps = {
   title: string;
   subTitle: string;
   update: Function;
+  focus: () => void;
 };
-
 export function Breadcumb(props: BreadcumbProps) {
   return (
-    <div className="d-flex align-items-center justify-content-between p-3 my-3 rounded shadow-sm">
+    <div className="d-flex align-items-center justify-content-between p-3 my-3 rounded shadow-sm bg-body">
       <div className="d-flex">
         <img
           className="me-3"
-          src="icon.png"
+          src="images/icon.png"
           alt="To-do-list"
           width="48"
           height="38"
@@ -200,16 +210,22 @@ export function Breadcumb(props: BreadcumbProps) {
         </div>
       </div>
       <div className="btn-group">
-        <a onClick={() => props.update()} className="btn btn-primary btn-sm">
+        <button
+          onClick={() => props.update()}
+          type="button"
+          className="btn btn-primary btn-sm"
+          title="Atualizar lista"
+        >
           <i className="bi bi-arrow-clockwise"></i>
-        </a>
-        <a
-          href="#form"
+        </button>
+        <button
+          onClick={props.focus}
+          type="button"
           className="btn btn-primary btn-sm active"
-          aria-current="page"
+          title="Adicionar nova tarefa"
         >
           <i className="bi bi-file-earmark-plus"></i>
-        </a>
+        </button>
       </div>
     </div>
   );
@@ -218,18 +234,16 @@ export function Breadcumb(props: BreadcumbProps) {
 type FormProps = {
   fnc: Function;
 };
-
-export function FormIncludeTask({ fnc }: FormProps) {
+export function FormIncludeTask(props: FormProps) {
   const [task, setTask] = useState("");
   const [deadline, setDealine] = useState("");
-  const date = FormatDateBR(new Date().toDateString());
   const include = async (e: FormEvent) => {
     e.preventDefault();
     const body = {
       task: task,
       deadline: FormatDateEN(deadline),
     };
-    await fnc(body);
+    await props.fnc(body);
     return;
   };
   return (
@@ -243,7 +257,6 @@ export function FormIncludeTask({ fnc }: FormProps) {
           className="form-control"
           id="date"
           name="date"
-          placeholder={date}
           onChange={(e) => setDealine(e.target.value)}
         />
       </div>
@@ -259,9 +272,12 @@ export function FormIncludeTask({ fnc }: FormProps) {
           onChange={(e) => setTask(e.target.value)}
         ></textarea>
       </div>
-      <button type="submit" className="btn btn-primary">
-        Cadastrar
-      </button>
+      <div className="text-end">
+        <button type="submit" className="btn btn-primary">
+          <i className="bi bi-plus-square" />
+          &nbsp;Cadastrar
+        </button>
+      </div>
     </form>
   );
 }

@@ -198,11 +198,18 @@ export default function Dashboard() {
               <td>{FormatDateBR(notify.createdAt)}</td>
               <td>{String(notify.read)}</td>
               <td>
-                <i
-                  className="bi bi-trash3"
-                  onClick={() => DeleteNotification(notify.id)}
-                ></i>
-                <i className="bi bi-check2-all" onClick={() => ReadNotification(notify.id)}></i>
+                <div className="d-flex gap-5 justify-content-center">
+                  <i
+                    title="Exluir notificação"
+                    className="bi bi-trash3 m-auto"
+                    onClick={() => DeleteNotification(notify.id)}
+                  ></i>
+                  <i
+                    title="Marcar como lida"
+                    className="bi bi-check2-all m-auto"
+                    onClick={() => ReadNotification(notify.id)}
+                  ></i>
+                </div>
               </td>
             </tr>
           ))
@@ -222,7 +229,7 @@ export default function Dashboard() {
     <div className="container">
       <SectionCenterStyled>
         <img
-          src="profile.png"
+          src="images/profile.png"
           style={{
             filter: "drop-shadow(rgba(34, 34, 34, 30%) 0px 3px 5px)",
             maxWidth: "300px",

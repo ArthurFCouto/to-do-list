@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="col-lg-6">
           <h1 className="display-5 fw-bold lh-1 mb-3">Página não encontrada</h1>
           <p className="lead">
-            A endereço que você digitou não foi encontrado. Talvez você queira
+            O endereço que você digitou não existe. Talvez você queira
             acessar uma das páginas abaixo.
           </p>
           <div className="d-grid gap-2 d-md-flex justify-content-md-start">
@@ -28,14 +28,14 @@ export default function NotFound() {
               className="btn btn-primary btn-lg px-4 me-md-2"
               onClick={() => navigate("/")}
             >
-              Home
+              <i className="bi bi-house" />&nbsp;Home
             </button>
             <button
               type="button"
               className="btn btn-outline-secondary btn-lg px-4"
               onClick={() => navigate("/dashboard")}
             >
-              Dashboard
+              <i className="bi bi-speedometer2" />&nbsp;Dashboard
             </button>
           </div>
         </div>

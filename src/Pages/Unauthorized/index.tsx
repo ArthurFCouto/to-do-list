@@ -1,11 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { SectionCenterStyled } from "../../Components/Commom/styles";
 
 export default function Unauthorized() {
   return (
-    <div className="px-4 py-5 my-5 text-center">
-        <h4 className="display-5 fw-bold">Você não está autenticado</h4>
+    <div className="px-4 py-5 text-center">
+        <h4 className="display-5 fw-bold">Você não está logado</h4>
         <img
           src="images/unauthorized.png"
           style={{
