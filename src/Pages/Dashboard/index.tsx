@@ -5,6 +5,7 @@ import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";
 import { AcordionItem } from "./components";
 import api from "../../Services/api";
+import NotificationToast from "../../Components/NotificationToast";
 
 type Task = {
   id: number;
@@ -318,6 +319,7 @@ export default function Dashboard() {
           <div className="accordion-body">Ainda não implementado.</div>
         </AcordionItem>
       </div>
+      <NotificationToast />
     </div>
   );
 }

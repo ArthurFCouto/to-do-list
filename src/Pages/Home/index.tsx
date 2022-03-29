@@ -5,10 +5,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Activities, Breadcumb, CardBody, FormIncludeTask } from "./components";
+import {
+  Activities,
+  Breadcumb,
+  CardBody,
+  FormIncludeTask,
+  ModalTask,
+} from "./components";
 import api from "../../Services/api";
 import { UserContext } from "../../Context";
 import AlertToast from "../../Components/AlertToast";
+import NotificationToast from "../../Components/NotificationToast";
 
 type Task = {
   check: boolean;
@@ -26,7 +33,6 @@ type BodyInclude = {
 
 export default function Home() {
   const form = useRef<any>(null);
-  const task = useRef<any>(null);
   const { user: userContext } = useContext(UserContext);
   const headers = { Authorization: `Bearer ${userContext?.token}` };
   const [taskPending, setTaskPending] = useState([]);
@@ -149,6 +155,7 @@ export default function Home() {
         const res = response.data;
         setTaskCompleted(res.filter((task: Task) => task.check));
         setTaskPending(res.filter((task: Task) => !task.check));
+        dispatchAlert({ display: false });
       })
       .catch((error) => {
         errorCatch(error, "Ops. Houve um erro ao carregar as atividades.");
@@ -159,67 +166,57 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <main className="container">
-        <Breadcumb
-          title="To-do-list"
-          subTitle="Since 2022"
-          update={() => FillTasks()}
-          focus={() => {
-            form.current.scrollIntoView();
-          }}
-        />
-        <div className="my-3 p-3 bg-body rounded shadow-sm">
-          <h6 className="border-bottom pb-2 mb-0">
-            Atividades Pendentes ({taskPending.length})
-          </h6>
-          {taskPending.length > 0 ? (
-            taskMap(taskPending, "pending", 3)
-          ) : (
-            <CardBody>Não há atividades para exibir.</CardBody>
-          )}
-          <small className="d-block text-end mt-3">
-            <button
-              type="button"
-              className="btn btn-link btn-sm"
-              onClick={() => {
-                task.current.scrollIntoView();
-              }}
-            >
-              Ver todas
-            </button>
-          </small>
-        </div>
-        <div className="my-3 p-3 bg-body rounded shadow-sm">
-          <h6 className="border-bottom pb-2 mb-0">Atividades Concluídas</h6>
-          {taskCompleted.length > 0 ? (
-            taskMap(taskCompleted, "completed", 5)
-          ) : (
-            <CardBody>Não há atividades para exibir.</CardBody>
-          )}
-        </div>
-        <div className="my-3 p-3 bg-body rounded shadow-sm" ref={task}>
-          <h6 className="border-bottom pb-2 mb-0">Todas as Atividades</h6>
-          {taskPending.length > 0 && taskMap(taskPending, "pending", 5)}
-          {taskCompleted.length > 0 && taskMap(taskCompleted, "completed", 5)}
-          {taskCompleted.length === 0 && taskPending.length === 0 && (
-            <CardBody>Não há atividades para exibir.</CardBody>
-          )}
-        </div>
-        <div
-          className="my-3 p-3 bg-body rounded shadow-sm"
-          id="form"
-          ref={form}
-        >
-          <FormIncludeTask fnc={(body: BodyInclude) => Include(body)} />
-        </div>
-      </main>
+    <div className="container">
+      <Breadcumb
+        title="To-do-list"
+        subTitle="Since 2022"
+        update={() => FillTasks()}
+        focus={() => {
+          form.current.scrollIntoView();
+        }}
+      />
+      <div className="my-3 p-3 bg-body rounded shadow-sm">
+        <h6 className="border-bottom pb-2 mb-0">
+          Atividades Pendentes ({taskPending.length})
+        </h6>
+        {taskPending.length > 0 ? (
+          taskMap(taskPending, "pending", 3)
+        ) : (
+          <CardBody>Não há atividades para exibir.</CardBody>
+        )}
+        <small className="d-block text-end mt-3">
+          <button
+            type="button"
+            className="btn btn-link btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#staticBackdrop"
+          >
+            Ver todas
+          </button>
+        </small>
+      </div>
+      <div className="my-3 p-3 bg-body rounded shadow-sm">
+        <h6 className="border-bottom pb-2 mb-0">Atividades Concluídas</h6>
+        {taskCompleted.length > 0 ? (
+          taskMap(taskCompleted, "completed", 5)
+        ) : (
+          <CardBody>Não há atividades para exibir.</CardBody>
+        )}
+      </div>
+      <div className="my-3 p-3 bg-body rounded shadow-sm" id="form" ref={form}>
+        <FormIncludeTask fnc={(body: BodyInclude) => Include(body)} />
+      </div>
+      <NotificationToast />
       <AlertToast
         show={alert.show}
         close={() => dispatchAlert({ display: false })}
         message={`${alert.message} ${alert.error}`}
         level={alert.level}
       />
-    </>
+      <ModalTask
+        id={"staticBackdrop"}
+        tasks={taskPending.concat(taskCompleted)}
+      />
+    </div>
   );
 }

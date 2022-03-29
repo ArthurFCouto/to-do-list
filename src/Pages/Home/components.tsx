@@ -13,7 +13,6 @@ type ActivitiesProps = {
   task: string;
   updatedAt?: string;
 };
-
 export function Activities({
   checkTask,
   conclude,
@@ -94,7 +93,8 @@ export function Activities({
   const pending = (
     <div className="d-flex justify-content-between">
       <strong className="d-block text-gray-dark">
-        <i className="bi bi-calendar" />{` ${FormatDateBR(deadline)}`}
+        <i className="bi bi-calendar" />
+        {` ${FormatDateBR(deadline)}`}
       </strong>
       {!check ? (
         <a
@@ -106,7 +106,7 @@ export function Activities({
         </a>
       ) : (
         <a title="Já concluída">
-          <i className="bi bi-check-square" />
+          <i className="bi bi-check-square text-primary" />
         </a>
       )}
     </div>
@@ -114,7 +114,8 @@ export function Activities({
   const completed = (
     <div className="d-flex justify-content-between">
       <strong className="text-gray-dark">
-        Conclusão: {updatedAt && FormatDateBR(updatedAt)}
+        <i className="bi bi-calendar2-check" />
+        &nbsp;{updatedAt && FormatDateBR(updatedAt)}
       </strong>
       {!deleted ? (
         <a
@@ -126,7 +127,7 @@ export function Activities({
         </a>
       ) : (
         <a title="Já excluída">
-          <i className="bi bi-trash3" />
+          <i className="bi bi-trash3 text-danger" />
         </a>
       )}
     </div>
@@ -279,5 +280,105 @@ export function FormIncludeTask(props: FormProps) {
         </button>
       </div>
     </form>
+  );
+}
+
+type ModalProps = {
+  tasks: Array<any>;
+  id: string;
+};
+type ModalTask = {
+  check: boolean;
+  updatedAt: string;
+  deadline: string;
+  createdAt: string;
+  task: string;
+}
+export function ModalTask(props: ModalProps) {
+  const { tasks } = props;
+  const [body, setBody] = useState([<></>]);
+  useEffect(() => {
+    setBody(
+      tasks.map((task: ModalTask) => (
+        <a
+          href="#"
+          className="list-group-item list-group-item-action d-flex gap-3 py-3"
+          aria-current="true"
+        >
+          <img
+            src="images/task.png"
+            alt="twbs"
+            width="32"
+            height="32"
+            className="rounded-circle flex-shrink-0 shadow"
+          />
+          <div className="d-flex gap-2 w-100 justify-content-between">
+            <div>
+              <h6 className="mb-0">
+                {task.check ? (
+                  <>
+                    <span
+                      className="d-inline-block bg-primary rounded-circle"
+                      style={{ width: ".5em", height: ".5em" }}
+                    />
+                    &nbsp;{FormatDateBR(task.updatedAt)}
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="d-inline-block bg-danger rounded-circle"
+                      style={{ width: ".5em", height: ".5em" }}
+                    />
+                    &nbsp;{FormatDateBR(task.deadline)}
+                  </>
+                )}
+              </h6>
+              <p className="mb-0 opacity-75">{task.task}</p>
+            </div>
+            <small className="opacity-50 text-nowrap">
+              <i className="bi bi-info-square" />
+              &nbsp;{FormatDateBR(task.createdAt)}
+            </small>
+          </div>
+        </a>
+      ))
+    );
+  }, [props.tasks]);
+  return (
+    <div
+      className="modal fade"
+      id={props.id}
+      tabIndex={-1}
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div className="modal-dialog modal-dialog-scrollable">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title" id="exampleModalLabel">
+              Todas as Atividades
+            </h5>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div className="modal-body">
+            <div className="list-group">{body}</div>
+          </div>
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

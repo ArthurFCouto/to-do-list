@@ -25,11 +25,11 @@ export default function AlertToast(props: AlertProps) {
         setBgColor("bg-danger text-white");
         break;
     }
-    setTimeout(() => props.close(), props.timing ? props.timing : 4000);
+    setTimeout(() => props.close(), props.timing ? props.timing : 5000);
   }, [props.level]);
 
   return props.show ? (
-    <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+    <div className="position-fixed bottom-0 start-50 translate-middle-x p-3" style={{ zIndex: 11 }}>
       <div className={`rounded shadow ${bgColor}`}>
         <div className="d-flex">
           <div className="toast-body">{props.message}</div>
