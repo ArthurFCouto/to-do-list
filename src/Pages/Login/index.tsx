@@ -7,8 +7,8 @@ import api from "../../Services/api";
 export default function Login() {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
-  const [visible, setVisible] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
+  const [visible, setVisible] = useState(false);
+  const [message, setMessage] = useState("");
   const [alterClass, dispatchAlter] = useReducer(Alter, {
     class: "alert-primary",
     aria: "Info:",
@@ -72,8 +72,12 @@ export default function Login() {
         };
         if (setUser) setUser(newUser);
         setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
+        setCookie(null, "USER_TOKEN", token, {
+          maxAge: 604800,
+          path: "/",
+        });
         if (body.remember)
-          setCookie(null, "USER_TOKEN", JSON.stringify(newUser), {
+          setCookie(null, "USER_DATA", JSON.stringify(newUser), {
             maxAge: 604800,
             path: "/",
           });

@@ -15,14 +15,15 @@ export default function Menu() {
         password: null,
         token: null,
       });
+    destroyCookie(null, "USER_DATA");
     destroyCookie(null, "USER_TOKEN");
   };
 
   useEffect(() => {
     try {
       const cookies = parseCookies();
-      if (cookies.USER_TOKEN && setUser)
-        setUser(JSON.parse(cookies.USER_TOKEN));
+      if (cookies.USER_DATA && setUser)
+        setUser(JSON.parse(cookies.USER_DATA));
     } catch (error) {
       console.log(error, logout());
     }

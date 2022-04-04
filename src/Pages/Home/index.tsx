@@ -161,6 +161,7 @@ export default function Home() {
         errorCatch(error, "Ops. Houve um erro ao carregar as atividades.");
       });
   }
+
   useLayoutEffect(() => {
     FillTasks();
   }, []);
@@ -189,7 +190,7 @@ export default function Home() {
             type="button"
             className="btn btn-link btn-sm"
             data-bs-toggle="modal"
-            data-bs-target="#staticBackdrop"
+            data-bs-target="#customeModal"
           >
             Ver todas
           </button>
@@ -214,7 +215,7 @@ export default function Home() {
         level={alert.level}
       />
       <ModalTask
-        id={"staticBackdrop"}
+        id={"customeModal"}
         tasks={taskPending.concat(taskCompleted)}
       />
     </div>
