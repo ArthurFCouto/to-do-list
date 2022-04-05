@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { UserContext } from "../../Context";
-import api from "../../Services/api";
 import Config from "../../Config";
+import NotificationService from "../../Services/NotificationService";
 
 export default function NotificationToast() {
   const { user } = useContext(UserContext);
@@ -14,34 +14,32 @@ export default function NotificationToast() {
     Authorization: `Bearer ${user?.token}`,
   };
   const Notification = async () => {
-    await api
-      .get("/notification", { headers })
-      .then((response) => {
-        const unread = response.data.filter((notify: any) => !notify.read);
-        setCountUnread(unread.length);
-        setNotifications(
-          response.data
-            .reverse()
-            .slice(0, 5)
-            .map((notify: any) => (
-              <li key={notify.id}>
-                <a
-                  className="dropdown-item d-flex align-items-center gap-2 py-2"
-                  href="#"
-                >
-                  <span
-                    className={`d-inline-block ${
-                      !notify.read ? "bg-danger" : "bg-primary"
-                    } rounded-circle`}
-                    style={{ width: ".5em", height: ".5em" }}
-                  />
-                  &nbsp;{notify.title}
-                </a>
-              </li>
-            ))
-        );
-      })
-      .catch((error) => console.log(error));
+    const response = await NotificationService.getAll();
+    if (response.status === 200) {
+      const unread = response.data.filter((notify: any) => !notify.read);
+      setCountUnread(unread.length);
+      setNotifications(
+        response.data
+          .reverse()
+          .slice(0, 5)
+          .map((notify: any) => (
+            <li key={notify.id}>
+              <a
+                className="dropdown-item d-flex align-items-center gap-2 py-2"
+                href="#"
+              >
+                <span
+                  className={`d-inline-block rounded-circle ${
+                    !notify.read ? "bg-danger" : "bg-primary"
+                  }`}
+                  style={{ width: ".5em", height: ".5em" }}
+                />
+                &nbsp;{notify.title}
+              </a>
+            </li>
+          ))
+      );
+    } else console.log(response.data);
   };
 
   useEffect(() => {
@@ -56,14 +54,14 @@ export default function NotificationToast() {
         }
       },
       onmessage(event) {
-        const data = JSON.parse(event.data);
+        //const data = JSON.parse(event.data);
         Notification();
       },
       onclose() {
-        console.log("Connection closed by the server");
+        //console.log("Connection closed by the server");
       },
       onerror(err) {
-        console.log("There was an error from server", err);
+        //console.log("There was an error from server", err);
       },
     });
     Notification();
@@ -76,9 +74,9 @@ export default function NotificationToast() {
     >
       <div className="dropdown position-relative">
         <span
-          className={`position-absolute top-0 start-100 translate-middle p-2 ${
+          className={`position-absolute top-0 start-100 translate-middle p-2 rounded-circle ${
             countUnread === 0 ? "bg-secondary" : "bg-danger border border-light"
-          } rounded-circle`}
+          }`}
         >
           <span className="visually-hidden">New alerts</span>
         </span>
@@ -96,13 +94,13 @@ export default function NotificationToast() {
           aria-labelledby="dropdownMenuButton2"
         >
           {notifications}
-          {notifications?.length === 0 && (
+          {notifications?.length === 0 && 
             <li>
               <a className="dropdown-item disabled" href="#">
                 Sem notificações
               </a>
             </li>
-          )}
+          }
           <li>
             <hr className="dropdown-divider" />
           </li>

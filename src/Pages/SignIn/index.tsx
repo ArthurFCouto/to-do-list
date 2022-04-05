@@ -1,7 +1,9 @@
 import React, { useReducer, useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { setCookie } from "nookies";
 import { UserContext } from "../../Context";
-import api from "../../Services/api";
+import SessionService from "../../Services/SessionService";
+import UserService from "../../Services/UserService";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -16,7 +18,6 @@ export default function SignIn() {
     aria: "Info:",
     icon: "#info-fill",
   });
-
   function Alter(state: any, action: any) {
     switch (action.status) {
       case "info":
@@ -49,52 +50,50 @@ export default function SignIn() {
     }
   }
 
-  async function Redirect(body: object) {
-    await api
-      .post("/session", body, {})
-      .then((response) => {
-        dispatchAlter({ status: response.status });
-        const { user, token } = response.data;
-        if (setUser)
-          setUser({
-            id: user.id,
-            email: email,
-            name: user.name,
-            password: password,
-            token,
-          });
-        setTimeout(() => navigate("/"), 1000);
-      })
-      .catch((error) => {
-        const { status, data } = error.response;
-        dispatchAlter({ status });
-        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
+  async function Redirect() {
+    const response = await SessionService.session(email, password);
+    if (response.status === 200) {
+      dispatchAlter({ status: response.status });
+      const { user, token } = response.data;
+      const newUser = {
+        id: user.id,
+        email: email,
+        name: user.name,
+        password: password,
+        token,
+      };
+      if (setUser) setUser(newUser);
+      setCookie(null, "USER_TOKEN", token, {
+        maxAge: 604800,
+        path: "/",
       });
+      setCookie(null, "USER_DATA", JSON.stringify(newUser), {
+        maxAge: 604800,
+        path: "/",
+      });
+      setTimeout(() => navigate("/"), 800);
+    } else {
+      const { status, data } = response;
+      dispatchAlter({ status });
+      setMessage(`Ops! ${data ? data.error : response.statusText}`);
+    }
   }
 
   const Register = async (e: FormEvent) => {
     e.preventDefault();
-    //window.scrollTo(0, 0);
     setMessage("Aguarde, validando seus dados...");
     dispatchAlter({ status: "info" });
     setVisible(true);
-    const body = {
-      name: name,
-      email: email,
-      password: password,
-    };
-    api
-      .post("user", body, {})
-      .then((response) => {
-        dispatchAlter({ status: response.status });
-        setMessage(`Bem vindo (a) ${name}! Redirecionando...`);
-        Redirect(body);
-      })
-      .catch((error) => {
-        const { status, data } = error.response;
-        dispatchAlter({ status });
-        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
-      });
+    const response = await UserService.save(name, email, password);
+    if (response.status === 200) {
+      dispatchAlter({ status: response.status });
+      setMessage(`Bem vindo (a) ${name}! Redirecionando...`);
+      Redirect();
+    } else {
+      const { status, data } = response;
+      dispatchAlter({ status });
+      setMessage(`Ops! ${data ? data.error : response.statusText}`);
+    }
   };
 
   return (

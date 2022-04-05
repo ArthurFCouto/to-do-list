@@ -2,15 +2,7 @@ import React from "react";
 import axios from "axios";
 import Config from "../Config";
 import { parseCookies } from "nookies";
-
-const api = axios.create({
-  baseURL: `${Config.baseUrl}`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export default api;
+import { axiosResponse } from "./types";
 
 const headers = {
   "Content-Type": "application/json",
@@ -29,5 +21,18 @@ export class ApiService {
       baseURL: `${Config.baseUrl}`,
       headers
     });
+  }
+
+  error(error: any): axiosResponse {
+    return error.response
+      ? error.response
+      : 
+        {
+          status: 500,
+          data: {
+            error: "Network error"
+          },
+          statusText: "Network error"
+        }
   }
 }

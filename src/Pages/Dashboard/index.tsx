@@ -1,4 +1,9 @@
-import React, { ReactElement, useContext, useEffect, useState } from "react";
+import React, {
+  ReactElement,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { SectionCenterStyled } from "../../Components/Commom/styles";
 import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";
@@ -9,12 +14,11 @@ import {
   OptionsNotify,
   OptionsTask,
 } from "./components";
-import NotificationToast from "../../Components/NotificationToast";
 import NotificationService from "../../Services/NotificationService";
 import UserService from "../../Services/UserService";
 import TaskService from "../../Services/TaskService";
 
-type Task = {
+interface Task {
   id: number;
   task: string;
   check: boolean;
@@ -22,7 +26,7 @@ type Task = {
   createdAt: string;
 };
 
-type User = {
+interface User {
   id: number;
   name: string;
   email: string;
@@ -30,7 +34,7 @@ type User = {
   updatedAt: string;
 };
 
-type Notification = {
+interface Notification {
   id: number;
   title: string;
   message: string;
@@ -40,6 +44,7 @@ type Notification = {
 
 export default function Dashboard() {
   const { user: userContext } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [listTasks, setListTasks] = useState<
     Array<ReactElement> | ReactElement
@@ -51,7 +56,9 @@ export default function Dashboard() {
     />
   );
   const [user, setUser] = useState([]);
-  const [listUser, setListUser] = useState<Array<ReactElement> | ReactElement>(
+  const [listUser, setListUser] = useState<
+    Array<ReactElement> | ReactElement
+  >(
     <LineCustomer
       colSpan={4}
       option={"loading"}
@@ -69,30 +76,43 @@ export default function Dashboard() {
     />
   );
 
-  const DeleteTask = async (id: number) => {
-    const response = await TaskService.exclude(id);
-    response.status === 200 ? FillTasks() : console.log(response.data);
-  };
+  const DeleteTask =
+    async (id: number) => {
+      const response = await TaskService.exclude(id);
+      response.status === 200 ? FillTasks() : console.log(response.data);
+    };
 
-  const ConcludeTask = async (id: number) => {
-    const response = await TaskService.update(id);
-    response.status === 200 ? FillTasks() : console.log(response.data);
-  };
+  const ConcludeTask =
+    async (id: number) => {
+      const response = await TaskService.update(id);
+      response.status === 200
+        ? FillTasks()
+        : console.log(response.data);
+    };
 
-  const DeleteUser = async (id: number) => {
-    const response = await UserService.exclude(id);
-    response.status === 200 ? FillUser() : console.log(response.data);
-  };
+  const DeleteUser = 
+    async (id: number) => {
+      const response = await UserService.exclude(id);
+      response.status === 200
+        ? FillUser()
+        : console.log(response.data);
+    };
 
-  const DeleteNotification = async (id: number) => {
-    const response = await NotificationService.exclude(id);
-    response.status === 200 ? FillNotifications() : console.log(response.data);
-  };
+  const DeleteNotification =
+    async (id: number) => {
+      const response = await NotificationService.exclude(id);
+      response.status === 200
+        ? FillNotifications()
+        : console.log(response.data);
+    };
 
-  const ReadNotification = async (id: number) => {
-    const response = await NotificationService.update(id);
-    response.status === 200 ? FillNotifications() : console.log(response.data);
-  };
+  const ReadNotification = 
+    async (id: number) => {
+      const response = await NotificationService.update(id);
+      response.status === 200
+        ? FillNotifications()
+        : console.log(response.data);
+    };
 
   async function FillTasks() {
     const response = await TaskService.getAll();
@@ -151,7 +171,7 @@ export default function Dashboard() {
               <td>
                 <OptionsTask
                   status={task.check}
-                  check={() => ConcludeTask(task.id)}
+                  up={() => ConcludeTask(task.id)}
                   del={() => DeleteTask(task.id)}
                 />
               </td>
@@ -175,10 +195,10 @@ export default function Dashboard() {
               <th scope="row">{user.id}</th>
               <td>{user.name}</td>
               <td>{user.email}</td>
-              <td>{user.createdAt}</td>
+              <td>--/--/----</td>
               <td>
                 <div className="row justify-content-evenly">
-                  <div className="col-sm">
+                  <div className="col-auto">
                     <i
                       title="Exluir usuário"
                       className="bi bi-trash3 m-auto text-danger"
@@ -237,9 +257,8 @@ export default function Dashboard() {
   }, [notifications]);
 
   return (
-    <>
-      <div className="container">
-        <SectionCenterStyled>
+    <div className="container">
+      <SectionCenterStyled>
           <img
             src="images/profile.png"
             style={{
@@ -250,12 +269,12 @@ export default function Dashboard() {
             }}
             alt="Imagem de perfil"
           />
-        </SectionCenterStyled>
-        <SectionCenterStyled>
+      </SectionCenterStyled>
+      <SectionCenterStyled>
           <h5>{userContext?.name}</h5>
-        </SectionCenterStyled>
-        <div className="accordion accordion-flush" id="accordion">
-          <AcordionItem
+      </SectionCenterStyled>
+      <div className="accordion accordion-flush" id="accordion">
+        <AcordionItem
             func={() => FillTasks()}
             id="one"
             idParent="accordion"
@@ -271,15 +290,15 @@ export default function Dashboard() {
                       <th scope="col">Tarefa</th>
                       <th scope="col">Criação</th>
                       <th scope="col">Prazo</th>
-                      <th scope="col">opções</th>
+                      <th scope="col">Opções</th>
                     </tr>
                   </thead>
                   <tbody>{listTasks}</tbody>
                 </table>
               </div>
             </div>
-          </AcordionItem>
-          <AcordionItem
+        </AcordionItem>
+        <AcordionItem
             func={() => FillNotifications()}
             id="two"
             idParent="accordion"
@@ -302,8 +321,8 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
-          </AcordionItem>
-          <AcordionItem
+        </AcordionItem>
+        <AcordionItem
             func={() => FillUser()}
             id="tree"
             idParent="accordion"
@@ -326,18 +345,16 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
-          </AcordionItem>
-          <AcordionItem
+        </AcordionItem>
+        <AcordionItem
             id="four"
             idParent="accordion"
             target="-four"
             title="Informações pessoais"
           >
-            <div className="accordion-body">Ainda não implementado.</div>
-          </AcordionItem>
-        </div>
+            <div className="accordion-body">Ainda não implementado. No momento o projeto será finalizado para dar continuídade em outros, mas em breve retornaremos.</div>
+        </AcordionItem>
       </div>
-      <NotificationToast />
-    </>
+    </div>
   );
 }

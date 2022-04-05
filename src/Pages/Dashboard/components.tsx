@@ -1,12 +1,25 @@
 import { SpinnerLoading } from "../../Components/Commom/components";
 
-type Props = {
+interface Props {
   children: React.ReactNode;
   func?: () => void;
   id: string;
   idParent: string;
   target: string;
   title: string;
+}
+
+interface LineErrorProps {
+  colSpan: number;
+  statusText?: string;
+  loadingText?: string;
+  option: "loading" | "error";
+};
+
+interface OptionProps {
+  status: boolean;
+  del: Function;
+  up: Function;
 };
 
 export function AcordionItem({
@@ -17,28 +30,6 @@ export function AcordionItem({
   target,
   title,
 }: Props) {
-  const test = (
-    <div className="accordion-item">
-      <h2 className="accordion-header" id="flush-headingOne">
-        <button
-          className="accordion-button collapsed"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#flush-collapseOne"
-          aria-expanded="false"
-          aria-controls="flush-collapseOne"
-        >
-          Accordion Item #1
-        </button>
-      </h2>
-      <div
-        id="flush-collapseOne"
-        className="accordion-collapse collapse"
-        aria-labelledby="flush-headingOne"
-        data-bs-parent="#accordionFlushExample"
-      ></div>
-    </div>
-  );
   return (
     <div className="accordion-item">
       <h2 className="accordion-header" id={`${id}`}>
@@ -66,11 +57,6 @@ export function AcordionItem({
   );
 }
 
-type OptionProps = {
-  status: boolean;
-  del: Function;
-  up: Function;
-};
 export function OptionsNotify({ status, del, up }: OptionProps) {
   return (
     <div className="row justify-content-evenly">
@@ -87,7 +73,7 @@ export function OptionsNotify({ status, del, up }: OptionProps) {
         ) : (
           <i
             title="Marcar como lida"
-            className="bi bi-check2 m-auto text-success"
+            className="bi bi-check2 m-auto text-danger"
             onClick={() => up()}
           />
         )}
@@ -96,12 +82,7 @@ export function OptionsNotify({ status, del, up }: OptionProps) {
   );
 }
 
-type OptionTaskProps = {
-  status: boolean;
-  del: Function;
-  check: Function;
-};
-export function OptionsTask({ status, del, check }: OptionTaskProps) {
+export function OptionsTask({ status, del, up }: OptionProps) {
   return (
     <div className="row justify-content-evenly">
       <div className="col-sm">
@@ -120,8 +101,8 @@ export function OptionsTask({ status, del, check }: OptionTaskProps) {
         ) : (
           <i
             title="Marcar como concluída"
-            className="bi bi-calendar m-auto text-success"
-            onClick={() => check()}
+            className="bi bi-calendar m-auto text-danger"
+            onClick={() => up()}
           />
         )}
       </div>
@@ -129,16 +110,15 @@ export function OptionsTask({ status, del, check }: OptionTaskProps) {
   );
 }
 
-type LineErrorProps = {
-  colSpan: number;
-  statusText?: string;
-  loadingText?: string;
-  option: "loading" | "error";
-};
 export function LineCustomer(props: LineErrorProps) {
-  const statusText = props.statusText ? props.statusText : "Erro inesperado";
+  const statusText = props.statusText
+    ? props.statusText
+    : "Erro inesperado";
+  const loadingText = props.loadingText
+    ? props.loadingText
+    : "Aguarde enquanto carregamos a lista...";
   const lineError = (
-    <tr key={0}>
+    <tr>
       <th scope="row">0</th>
       <td>Houve um erro durante o carregamento.</td>
       <td colSpan={props.colSpan}>
@@ -148,18 +128,17 @@ export function LineCustomer(props: LineErrorProps) {
       </td>
     </tr>
   );
-  const loadingText = props.loadingText
-    ? props.loadingText
-    : "Aguarde enquanto carregamos a lista...";
   const lineLoading = (
-    <tr key={0}>
+    <tr>
       <th scope="row">
         <SpinnerLoading />
       </th>
       <td colSpan={props.colSpan}>{loadingText}</td>
     </tr>
   );
-  return props.option === "loading" ? lineLoading : lineError;
+  return props.option === "loading"
+    ? lineLoading
+    : lineError;
 }
 
 export const iconEmpty = (

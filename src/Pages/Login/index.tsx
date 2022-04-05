@@ -1,8 +1,8 @@
-import React, { useReducer, useState, useContext } from "react";
+import React, { useReducer, useState, useContext, FormEvent } from "react";
 import { setCookie } from "nookies";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import api from "../../Services/api";
+import SessionService from "../../Services/SessionService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,7 +14,6 @@ export default function Login() {
     aria: "Info:",
     icon: "#info-fill",
   });
-
   function Alter(state: any, action: any) {
     switch (action.status) {
       case "info":
@@ -47,47 +46,45 @@ export default function Login() {
     }
   }
 
-  const Login = async (e: any) => {
+  const Login = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const body = {
-      email: data.get("email"),
-      password: data.get("password"),
+      email: data.get("email")?.toString(),
+      password: data.get("password")?.toString(),
       remember: data.get("remember"),
     };
     dispatchAlter({ status: "info" });
     setMessage("Aguarde, validando seus dados...");
     setVisible(true);
-    await api
-      .post("/session", body, {})
-      .then((response) => {
-        dispatchAlter({ status: response.status });
-        const { user, token } = response.data;
-        const newUser = {
-          id: user.id,
-          email: body.email,
-          name: user.name,
-          password: body.password,
-          token,
-        };
-        if (setUser) setUser(newUser);
-        setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
-        setCookie(null, "USER_TOKEN", token, {
+    const response = await SessionService.session(body.email, body.password);
+    if (response.status === 200) {
+      dispatchAlter({ status: response.status });
+      const { user, token } = response.data;
+      const newUser = {
+        id: user.id,
+        email: body.email,
+        name: user.name,
+        password: body.password,
+        token,
+      };
+      if (setUser) setUser(newUser);
+      setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
+      setCookie(null, "USER_TOKEN", token, {
+        maxAge: 604800,
+        path: "/",
+      });
+      if (body.remember)
+        setCookie(null, "USER_DATA", JSON.stringify(newUser), {
           maxAge: 604800,
           path: "/",
         });
-        if (body.remember)
-          setCookie(null, "USER_DATA", JSON.stringify(newUser), {
-            maxAge: 604800,
-            path: "/",
-          });
-        setTimeout(() => navigate("/"), 1000);
-      })
-      .catch((error) => {
-        const { status, data } = error.response;
-        dispatchAlter({ status });
-        setMessage(`Ops! ${data ? data.error : error.response.statusText}`);
-      });
+      setTimeout(() => navigate("/"), 800);
+    } else {
+      const { status, data } = response;
+      dispatchAlter({ status });
+      setMessage(`Ops! ${data ? data.error : response.statusText}`);
+    }
   };
 
   return (
@@ -141,6 +138,7 @@ export default function Login() {
                   className="form-check-input"
                   id="remember"
                   name="remember"
+                  checked={true}
                 />
                 <label className="form-check-label" htmlFor="remember">
                   Manter sessão aberta

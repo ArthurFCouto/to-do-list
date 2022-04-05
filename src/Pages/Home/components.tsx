@@ -1,28 +1,44 @@
-import React, { FormEvent, useEffect, useReducer, useState } from "react";
+import React, { FormEvent, ReactElement, useEffect, useReducer, useState } from "react";
 import { SpinnerLoading } from "../../Components/Commom/components";
 import { FormatDateBR, FormatDateEN } from "../../Components/Commom/functions";
+import TaskService from "../../Services/TaskService";
 
-type ActivitiesProps = {
-  checkTask?: boolean;
-  conclude: Function;
-  create: string;
-  deadline: string;
-  exclude: Function;
+interface ActivitiesProps {
   id: number;
-  status: "pending" | "completed";
+  create: string;
   task: string;
+  deadline: Date;
+  check?: boolean;
   updatedAt?: string;
+  status: "pending" | "completed";
 };
-export function Activities({
-  checkTask,
-  conclude,
-  deadline,
-  exclude,
-  id,
-  status,
-  task,
-  updatedAt,
-}: ActivitiesProps) {
+interface CardBodyProps {
+  children: React.ReactNode;
+  border?: "border-warning" | "border-danger";
+};
+interface BreadcumbProps {
+  title: string;
+  subTitle: string;
+  update: Function;
+  focus: Function;
+};
+interface ModalProps {
+  tasks: Array<Task>;
+  id: string;
+};
+type Task = {
+  check: boolean;
+  updatedAt: string;
+  deadline: string;
+  createdAt: string;
+  task: string;
+};
+interface FormProps {
+  include: Function;
+};
+
+export function Activities(props: ActivitiesProps) {
+  const { check: checkTask, deadline, id, status, task, updatedAt } = props;
   const [check, setCheck] = useState(checkTask);
   const [deleted, setDeleted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,32 +77,27 @@ export function Activities({
         throw new Error();
     }
   }
-  async function Fnc(mode: "conclude" | "exclude") {
+  async function Conclude(id: number) {
+    const response = await TaskService.update(id);
+    if (response.status === 200) {
+      dispatchAlterClass({ status: "primary" });
+      setCheck(true);
+    } else alert("Houve um erro ao concluir a tarefa. Tente mais tarde");
+  }
+  async function Exclude(id: number) {
+    const response = await TaskService.exclude(id);
+    if (response.status === 200) {
+      dispatchAlterClass({ status: "primary" });
+      setCheck(true);
+      setDeleted(true);
+    } else alert("Houve um erro ao excluir a tarefa. Tente mais tarde");
+  }
+  async function AlterStatus(mode: "conclude" | "exclude") {
     setLoading(true);
     if (mode == "conclude") {
-      if (conclude != null && !check) {
-        const response = await conclude(id);
-        if (response === 200) {
-          dispatchAlterClass({ status: "primary" });
-          setCheck(true);
-        } else
-          alert(
-            "Houve um erro ao concluir a tarefa. " +
-              response.response.data.error
-          );
-      }
-    } else if (mode == "exclude") {
-      if (exclude != null) {
-        const response = await exclude(id);
-        if (response === 200) {
-          dispatchAlterClass({ status: "primary" });
-          setCheck(true);
-          setDeleted(true);
-        } else
-          alert(
-            "Houve um erro ao excluir a tarefa. " + response.response.data.error
-          );
-      }
+      if (!check) await Conclude(id);
+    } else {
+      await Exclude(id);
     }
     setLoading(false);
   }
@@ -94,21 +105,23 @@ export function Activities({
     <div className="d-flex justify-content-between">
       <strong className="d-block text-gray-dark">
         <i className="bi bi-calendar" />
-        {` ${FormatDateBR(deadline)}`}
+        {` ${FormatDateBR(deadline.toString())}`}
       </strong>
-      {!check ? (
-        <a
-          className="btn-link"
-          style={{ cursor: "pointer" }}
-          onClick={() => Fnc("conclude")}
-        >
-          {loading ? <SpinnerLoading color="text-primary" /> : "Concluir"}
-        </a>
-      ) : (
-        <a title="Já concluída">
-          <i className="bi bi-check-square text-primary" />
-        </a>
-      )}
+      {
+        !check
+          ?
+            <a
+              className="btn-link"
+              style={{ cursor: "pointer" }}
+              onClick={() => AlterStatus("conclude")}
+            >
+              {loading ? <SpinnerLoading color="text-primary" /> : "Concluir"}
+            </a>
+          :
+            <a title="Já concluída">
+              <i className="bi bi-check-square text-primary" />
+            </a>
+      }
     </div>
   );
   const completed = (
@@ -117,19 +130,25 @@ export function Activities({
         <i className="bi bi-calendar2-check" />
         &nbsp;{updatedAt && FormatDateBR(updatedAt)}
       </strong>
-      {!deleted ? (
-        <a
-          className="btn-link"
-          style={{ cursor: "pointer" }}
-          onClick={() => Fnc("exclude")}
-        >
-          {loading ? <SpinnerLoading color="text-primary" /> : "Excluir"}
-        </a>
-      ) : (
-        <a title="Já excluída">
-          <i className="bi bi-trash3 text-danger" />
-        </a>
-      )}
+      {
+        !deleted
+          ?
+            <a
+              className="btn-link"
+              style={{ cursor: "pointer" }}
+              onClick={() => AlterStatus("exclude")}
+            >
+              {
+                loading
+                  ? <SpinnerLoading color="text-primary" />
+                  : "Excluir"
+              }
+            </a>
+          :
+            <a title="Já excluída">
+              <i className="bi bi-trash3 text-danger" />
+            </a>
+      }
     </div>
   );
   useEffect(() => {
@@ -163,23 +182,23 @@ export function Activities({
         focusable="false"
       >
         <title>Placeholder</title>
-        <rect width="100%" height="100%" fill={alterClass.color}></rect>
-        <text x="50%" y="50%" fill={alterClass.color} dy=".3em">
+        <rect width="100%" height="100%" fill={ alterClass.color }></rect>
+        <text x="50%" y="50%" fill={ alterClass.color } dy=".3em">
           32x32
         </text>
       </svg>{" "}
       <div className="pb-3 mb-0 small lh-sm border-bottom w-100">
-        {status === "completed" ? completed : pending}
-        <span className="d-block">{task}</span>
+        {
+          status === "completed"
+            ? completed
+            : pending
+        }
+        <span className="d-block">{ task }</span>
       </div>
     </div>
   );
 }
 
-type CardBodyProps = {
-  children: React.ReactNode;
-  border?: "border-warning" | "border-danger";
-};
 export function CardBody(props: CardBodyProps) {
   return (
     <div className={"card " + props?.border}>
@@ -188,12 +207,6 @@ export function CardBody(props: CardBodyProps) {
   );
 }
 
-type BreadcumbProps = {
-  title: string;
-  subTitle: string;
-  update: Function;
-  focus: () => void;
-};
 export function Breadcumb(props: BreadcumbProps) {
   return (
     <div className="d-flex align-items-center justify-content-between p-3 my-3 rounded shadow-sm bg-body">
@@ -220,7 +233,7 @@ export function Breadcumb(props: BreadcumbProps) {
           <i className="bi bi-arrow-clockwise"></i>
         </button>
         <button
-          onClick={props.focus}
+          onClick={() => props.focus()}
           type="button"
           className="btn btn-primary btn-sm active"
           title="Adicionar nova tarefa"
@@ -232,9 +245,6 @@ export function Breadcumb(props: BreadcumbProps) {
   );
 }
 
-type FormProps = {
-  fnc: Function;
-};
 export function FormIncludeTask(props: FormProps) {
   const [task, setTask] = useState("");
   const [deadline, setDealine] = useState("");
@@ -244,7 +254,7 @@ export function FormIncludeTask(props: FormProps) {
       task: task,
       deadline: FormatDateEN(deadline),
     };
-    await props.fnc(body);
+    await props.include(body);
     return;
   };
   return (
@@ -283,23 +293,11 @@ export function FormIncludeTask(props: FormProps) {
   );
 }
 
-type ModalProps = {
-  tasks: Array<any>;
-  id: string;
-};
-type ModalTask = {
-  check: boolean;
-  updatedAt: string;
-  deadline: string;
-  createdAt: string;
-  task: string;
-}
 export function ModalTask(props: ModalProps) {
-  const { tasks } = props;
-  const [body, setBody] = useState([<></>]);
+  const [body, setBody] = useState<Array<ReactElement> | ReactElement>();
   useEffect(() => {
     setBody(
-      tasks.map((task: ModalTask) => (
+      props.tasks.map((task: Task) => (
         <a
           href="#"
           className="list-group-item list-group-item-action d-flex gap-3 py-3"
@@ -315,29 +313,31 @@ export function ModalTask(props: ModalProps) {
           <div className="d-flex gap-2 w-100 justify-content-between">
             <div>
               <h6 className="mb-0">
-                {task.check ? (
-                  <>
-                    <span
-                      className="d-inline-block bg-primary rounded-circle"
-                      style={{ width: ".5em", height: ".5em" }}
-                    />
-                    &nbsp;{FormatDateBR(task.updatedAt)}
-                  </>
-                ) : (
-                  <>
-                    <span
-                      className="d-inline-block bg-danger rounded-circle"
-                      style={{ width: ".5em", height: ".5em" }}
-                    />
-                    &nbsp;{FormatDateBR(task.deadline)}
-                  </>
-                )}
+                {
+                  task.check
+                  ?
+                    <>
+                      <span
+                        className="d-inline-block bg-primary rounded-circle"
+                        style={{ width: ".5em", height: ".5em" }}
+                      />
+                      {` ${FormatDateBR(task.updatedAt)}`}
+                    </>
+                  :
+                    <>
+                      <span
+                        className="d-inline-block bg-danger rounded-circle"
+                        style={{ width: ".5em", height: ".5em" }}
+                      />
+                      {` ${FormatDateBR(task.deadline)}`}
+                    </>
+                }
               </h6>
               <p className="mb-0 opacity-75">{task.task}</p>
             </div>
             <small className="opacity-50 text-nowrap">
               <i className="bi bi-info-square" />
-              &nbsp;{FormatDateBR(task.createdAt)}
+              {` ${FormatDateBR(task.createdAt)}`}
             </small>
           </div>
         </a>

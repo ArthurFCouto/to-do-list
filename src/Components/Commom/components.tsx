@@ -1,4 +1,4 @@
-type SpinnerColor = {
+interface SpinnerColor {
   color?: "text-primary" | "text-light" | "text-success";
 };
 

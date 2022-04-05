@@ -1,6 +1,6 @@
 import React, {
-  useContext,
-  useLayoutEffect,
+  useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -12,29 +12,23 @@ import {
   FormIncludeTask,
   ModalTask,
 } from "./components";
-import api from "../../Services/api";
-import { UserContext } from "../../Context";
 import AlertToast from "../../Components/AlertToast";
 import NotificationToast from "../../Components/NotificationToast";
+import TaskService from "../../Services/TaskService";
 
-type Task = {
+interface Task {
+  id: number;
   check: boolean;
   createdAt: string;
-  updatedAt: string;
-  deadline: string;
-  id: number;
+  deadline: Date;
   task: string;
+  updatedAt: string;
 };
 
-type BodyInclude = {
-  task: string;
-  deadline: Date;
-};
+type BodyTask = Omit<Task, 'id' | 'check' | 'createdAt' | 'updatedAt' >;
 
 export default function Home() {
   const form = useRef<any>(null);
-  const { user: userContext } = useContext(UserContext);
-  const headers = { Authorization: `Bearer ${userContext?.token}` };
   const [taskPending, setTaskPending] = useState([]);
   const [taskCompleted, setTaskCompleted] = useState([]);
   const [alert, dispatchAlert] = useReducer(Alert, {
@@ -43,6 +37,7 @@ export default function Home() {
     error: "",
     level: "info",
   });
+
   function Alert(state: any, action: any) {
     switch (action.display) {
       case true:
@@ -63,6 +58,7 @@ export default function Home() {
         throw new Error();
     }
   }
+
   const taskMap = (
     tasks: Array<Task>,
     status: "pending" | "completed",
@@ -70,22 +66,21 @@ export default function Home() {
   ) =>
     tasks
       .slice(0, slice)
-      .map((task: Task) => (
+      .map((task: Task, index: number) => (
         <Activities
-          key={task.id}
-          checkTask={task.check}
-          conclude={(id: number) => Conclude(id)}
+          key={index}
+          id={task.id}
+          check={task.check}
           create={task.createdAt}
           deadline={task.deadline}
-          exclude={(id: number) => Exclude(id)}
-          id={task.id}
           status={status}
           task={task.task}
           updatedAt={task.updatedAt}
         />
       ));
+
   const errorCatch = (error: any, message: string) => {
-    const { statusText, data } = error.response;
+    const { statusText, data } = error;
     dispatchAlert({
       display: true,
       message: message,
@@ -93,35 +88,11 @@ export default function Home() {
       level: "danger",
     });
   };
-  async function Conclude(id: number) {
-    return await api
-      .put(
-        `/task/${id}`,
-        {},
-        {
-          headers,
-        }
-      )
-      .then((response) => {
-        return response.status;
-      })
-      .catch((error) => {
-        return error;
-      });
-  }
-  async function Exclude(id: number) {
-    return await api
-      .delete(`/task/${id}`, {
-        headers,
-      })
-      .then((response) => {
-        return response.status;
-      })
-      .catch((error) => {
-        return error;
-      });
-  }
-  async function Include(body: BodyInclude) {
+
+  const level = useMemo(()=> alert.level, [alert]);
+  const taskModal = useMemo(()=> taskPending.concat(taskCompleted), [taskPending, taskCompleted]);
+
+  async function Include(body: BodyTask) {
     dispatchAlert({
       display: true,
       message: "Aguarde, cadastrando atividade...",
@@ -129,40 +100,31 @@ export default function Home() {
       level: "info",
     });
     window.scrollTo(0, 0);
-    await api
-      .post(`/task`, body, {
-        headers,
-      })
-      .then(() => {
-        dispatchAlert({
-          display: true,
-          message: "Atividade cadastrada com sucesso!",
-          error: "",
-          level: "success",
-        });
-        FillTasks();
-      })
-      .catch((error) => {
-        errorCatch(error, "Ops. Houve um erro ao cadastrar atividade.");
+    const response = await TaskService.save(body.task, body.deadline);
+    if(response.status === 200) {
+      dispatchAlert({
+        display: true,
+        message: "Atividade cadastrada com sucesso!",
+        error: "",
+        level: "success",
       });
-  }
-  async function FillTasks() {
-    await api
-      .get("/task", {
-        headers,
-      })
-      .then((response) => {
-        const res = response.data;
-        setTaskCompleted(res.filter((task: Task) => task.check));
-        setTaskPending(res.filter((task: Task) => !task.check));
-        dispatchAlert({ display: false });
-      })
-      .catch((error) => {
-        errorCatch(error, "Ops. Houve um erro ao carregar as atividades.");
-      });
+      FillTasks();
+    } else
+      errorCatch(response, "Ops. Houve um erro ao cadastrar atividade.");
   }
 
-  useLayoutEffect(() => {
+  async function FillTasks() {
+    const response = await TaskService.getAll();
+    if(response.status === 200) {
+      const { data } = response;
+      setTaskCompleted(data.filter((task: Task) => task.check));
+      setTaskPending(data.filter((task: Task) => !task.check));
+      dispatchAlert({ display: false });
+    } else
+      errorCatch(response, "Ops. Houve um erro ao carregar as atividades.");
+  }
+
+  useEffect(() => {
     FillTasks();
   }, []);
 
@@ -180,43 +142,50 @@ export default function Home() {
         <h6 className="border-bottom pb-2 mb-0">
           Atividades Pendentes ({taskPending.length})
         </h6>
-        {taskPending.length > 0 ? (
-          taskMap(taskPending, "pending", 3)
-        ) : (
-          <CardBody>Não há atividades para exibir.</CardBody>
+        {
+          taskPending.length > 0
+          ? taskMap(taskPending, "pending", 3)
+          : <CardBody>Não há atividades para exibir.</CardBody>
+        }
+        {
+          taskPending.length > 0 && (
+            <small className="d-block text-end mt-3">
+              <button
+                type="button"
+                className="btn btn-link btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#customeModal"
+              >
+                Ver todas
+              </button>
+            </small>
         )}
-        <small className="d-block text-end mt-3">
-          <button
-            type="button"
-            className="btn btn-link btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#customeModal"
-          >
-            Ver todas
-          </button>
-        </small>
       </div>
       <div className="my-3 p-3 bg-body rounded shadow-sm">
         <h6 className="border-bottom pb-2 mb-0">Atividades Concluídas</h6>
-        {taskCompleted.length > 0 ? (
-          taskMap(taskCompleted, "completed", 5)
-        ) : (
-          <CardBody>Não há atividades para exibir.</CardBody>
-        )}
+        {
+          taskCompleted.length > 0
+            ? taskMap(taskCompleted, "completed", 5)
+            : <CardBody>Não há atividades para exibir.</CardBody>
+        }
       </div>
-      <div className="my-3 p-3 bg-body rounded shadow-sm" id="form" ref={form}>
-        <FormIncludeTask fnc={(body: BodyInclude) => Include(body)} />
+      <div
+        className="my-3 p-3 bg-body rounded shadow-sm"
+        id="form"
+        ref={form}
+      >
+        <FormIncludeTask include={(body: BodyTask) => Include(body)} />
       </div>
       <NotificationToast />
       <AlertToast
         show={alert.show}
         close={() => dispatchAlert({ display: false })}
         message={`${alert.message} ${alert.error}`}
-        level={alert.level}
+        level={level}
       />
       <ModalTask
         id={"customeModal"}
-        tasks={taskPending.concat(taskCompleted)}
+        tasks={taskModal}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 export type axiosResponse = {
-  data: Array<never>;
+  data: any;
   status: number;
   statusText: string;
 };
