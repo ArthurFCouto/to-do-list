@@ -352,7 +352,7 @@ export default function Dashboard() {
             target="-four"
             title="Informações pessoais"
           >
-            <div className="accordion-body">Ainda não implementado. No momento o projeto será finalizado para dar continuídade em outros, mas em breve retornaremos.</div>
+            <div className="accordion-body">Ainda não implementado. No momento o projeto será finalizado para dar continuidade em outros, mas em breve retornaremos.</div>
         </AcordionItem>
       </div>
     </div>
