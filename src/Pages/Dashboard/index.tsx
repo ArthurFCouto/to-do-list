@@ -1,9 +1,4 @@
-import React, {
-  ReactElement,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { ReactElement, useContext, useEffect, useState } from "react";
 import { SectionCenterStyled } from "../../Components/Commom/styles";
 import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";
@@ -24,7 +19,7 @@ interface Task {
   check: boolean;
   deadline: string;
   createdAt: string;
-};
+}
 
 interface User {
   id: number;
@@ -32,7 +27,7 @@ interface User {
   email: string;
   createdAt: string;
   updatedAt: string;
-};
+}
 
 interface Notification {
   id: number;
@@ -40,11 +35,10 @@ interface Notification {
   message: string;
   createdAt: string;
   read: boolean;
-};
+}
 
 export default function Dashboard() {
   const { user: userContext } = useContext(UserContext);
-  const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [listTasks, setListTasks] = useState<
     Array<ReactElement> | ReactElement
@@ -58,7 +52,7 @@ export default function Dashboard() {
   const [user, setUser] = useState([]);
   const [listUser, setListUser] = useState<
     Array<ReactElement> | ReactElement
-  >(
+    >(
     <LineCustomer
       colSpan={4}
       option={"loading"}
@@ -76,43 +70,30 @@ export default function Dashboard() {
     />
   );
 
-  const DeleteTask =
-    async (id: number) => {
-      const response = await TaskService.exclude(id);
-      response.status === 200 ? FillTasks() : console.log(response.data);
-    };
+  const DeleteTask = async (id: number) => {
+    const response = await TaskService.exclude(id);
+    response.status === 200 ? FillTasks() : console.log(response.data);
+  };
 
-  const ConcludeTask =
-    async (id: number) => {
-      const response = await TaskService.update(id);
-      response.status === 200
-        ? FillTasks()
-        : console.log(response.data);
-    };
+  const ConcludeTask = async (id: number) => {
+    const response = await TaskService.update(id);
+    response.status === 200 ? FillTasks() : console.log(response.data);
+  };
 
-  const DeleteUser = 
-    async (id: number) => {
-      const response = await UserService.exclude(id);
-      response.status === 200
-        ? FillUser()
-        : console.log(response.data);
-    };
+  const DeleteUser = async (id: number) => {
+    const response = await UserService.exclude(id);
+    response.status === 200 ? FillUser() : console.log(response.data);
+  };
 
-  const DeleteNotification =
-    async (id: number) => {
-      const response = await NotificationService.exclude(id);
-      response.status === 200
-        ? FillNotifications()
-        : console.log(response.data);
-    };
+  const DeleteNotification = async (id: number) => {
+    const response = await NotificationService.exclude(id);
+    response.status === 200 ? FillNotifications() : console.log(response.data);
+  };
 
-  const ReadNotification = 
-    async (id: number) => {
-      const response = await NotificationService.update(id);
-      response.status === 200
-        ? FillNotifications()
-        : console.log(response.data);
-    };
+  const ReadNotification = async (id: number) => {
+    const response = await NotificationService.update(id);
+    response.status === 200 ? FillNotifications() : console.log(response.data);
+  };
 
   async function FillTasks() {
     const response = await TaskService.getAll();
@@ -259,100 +240,107 @@ export default function Dashboard() {
   return (
     <div className="container">
       <SectionCenterStyled>
-          <img
-            src="images/profile.png"
-            style={{
-              filter: "drop-shadow(rgba(34, 34, 34, 30%) 0px 3px 5px)",
-              maxWidth: "300px",
-              maxHeight: "185px",
-              height: "auto",
-            }}
-            alt="Imagem de perfil"
-          />
+        <img
+          src="images/profile.png"
+          style={{
+            filter: "drop-shadow(rgba(34, 34, 34, 30%) 0px 3px 5px)",
+            maxWidth: "300px",
+            maxHeight: "185px",
+            height: "auto",
+          }}
+          alt="Imagem de perfil"
+        />
       </SectionCenterStyled>
       <SectionCenterStyled>
-          <h5>{userContext?.name}</h5>
+        <h5>{userContext?.name}</h5>
       </SectionCenterStyled>
       <div className="accordion accordion-flush" id="accordion">
         <AcordionItem
-            func={() => FillTasks()}
-            id="one"
-            idParent="accordion"
-            target="-one"
-            title="Gerenciar Tarefas"
-          >
-            <div className="accordion-body">
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th scope="col">#ID</th>
-                      <th scope="col">Tarefa</th>
-                      <th scope="col">Criação</th>
-                      <th scope="col">Prazo</th>
-                      <th scope="col">Opções</th>
-                    </tr>
-                  </thead>
-                  <tbody>{listTasks}</tbody>
-                </table>
-              </div>
+          func={() => FillTasks()}
+          id="one"
+          idParent="accordion"
+          target="-one"
+          title="Gerenciar Tarefas"
+        >
+          <div className="accordion-body">
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#ID</th>
+                    <th scope="col">Tarefa</th>
+                    <th scope="col">Criação</th>
+                    <th scope="col">Prazo</th>
+                    <th scope="col">Opções</th>
+                  </tr>
+                </thead>
+                <tbody>{listTasks}</tbody>
+              </table>
             </div>
+          </div>
         </AcordionItem>
         <AcordionItem
-            func={() => FillNotifications()}
-            id="two"
-            idParent="accordion"
-            target="-two"
-            title={"Gerenciar notificações"}
-          >
-            <div className="accordion-body">
-              <div className="table-responsive">
-                <table className="table table-hover table-sm">
-                  <thead>
-                    <tr>
-                      <th scope="col">#Status</th>
-                      <th scope="col">Titulo</th>
-                      <th scope="col">Detalhes</th>
-                      <th scope="col">Criação</th>
-                      <th scope="col">Opções</th>
-                    </tr>
-                  </thead>
-                  <tbody>{listNotifications}</tbody>
-                </table>
-              </div>
+          func={() => FillNotifications()}
+          id="two"
+          idParent="accordion"
+          target="-two"
+          title={"Gerenciar notificações"}
+        >
+          <div className="accordion-body">
+            <div className="table-responsive">
+              <table className="table table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th scope="col">#Status</th>
+                    <th scope="col">Titulo</th>
+                    <th scope="col">Detalhes</th>
+                    <th scope="col">Criação</th>
+                    <th scope="col">Opções</th>
+                  </tr>
+                </thead>
+                <tbody>{listNotifications}</tbody>
+              </table>
             </div>
+          </div>
         </AcordionItem>
         <AcordionItem
-            func={() => FillUser()}
-            id="tree"
-            idParent="accordion"
-            target="-tree"
-            title={"Gerenciar usuários"}
-          >
-            <div className="accordion-body">
-              <div className="table-responsive">
-                <table className="table table-hover table-sm">
-                  <thead>
-                    <tr>
-                      <th scope="col">#ID</th>
-                      <th scope="col">Nome</th>
-                      <th scope="col">Email</th>
-                      <th scope="col">Criação</th>
-                      <th scope="col">Opções</th>
-                    </tr>
-                  </thead>
-                  <tbody>{listUser}</tbody>
-                </table>
-              </div>
+          func={() => FillUser()}
+          id="tree"
+          idParent="accordion"
+          target="-tree"
+          title={"Gerenciar usuários"}
+        >
+          <div className="accordion-body">
+            <div className="table-responsive">
+              <table className="table table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th scope="col">#ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Criação</th>
+                    <th scope="col">Opções</th>
+                  </tr>
+                </thead>
+                <tbody>{listUser}</tbody>
+              </table>
             </div>
+          </div>
         </AcordionItem>
         <AcordionItem
-            id="four"
-            idParent="accordion"
-            target="-four"
-            title="Informações pessoais"
-          >
-            <div className="accordion-body">Ainda não implementado. No momento o projeto será finalizado para dar continuidade em outros, mas em breve retornaremos.</div>
+          id="four"
+          idParent="accordion"
+          target="-four"
+          title="Informações pessoais"
+        >
+          <div className="accordion-body">
+            <div className="row justify-content-evenly">
+              <div className="col-auto text-center">
+                Ainda não implementado. <br />
+                No momento o projeto será finalizado, mas retornaremos em breve.
+              </div>
+            </div>
+          </div>
         </AcordionItem>
       </div>
     </div>

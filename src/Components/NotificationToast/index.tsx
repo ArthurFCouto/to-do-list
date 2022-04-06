@@ -4,6 +4,12 @@ import { UserContext } from "../../Context";
 import Config from "../../Config";
 import NotificationService from "../../Services/NotificationService";
 
+interface Notify {
+  id: number;
+  read: boolean;
+  title: string;
+}
+
 export default function NotificationToast() {
   const { user } = useContext(UserContext);
   const [countUnread, setCountUnread] = useState(0);
@@ -16,14 +22,14 @@ export default function NotificationToast() {
   const Notification = async () => {
     const response = await NotificationService.getAll();
     if (response.status === 200) {
-      const unread = response.data.filter((notify: any) => !notify.read);
+      const unread = response.data.filter((notify: Notify) => !notify.read);
       setCountUnread(unread.length);
       setNotifications(
         response.data
           .reverse()
           .slice(0, 5)
-          .map((notify: any) => (
-            <li key={notify.id}>
+          .map((notify: Notify, index: number) => (
+            <li key={index}>
               <a
                 className="dropdown-item d-flex align-items-center gap-2 py-2"
                 href="#"
@@ -75,7 +81,9 @@ export default function NotificationToast() {
       <div className="dropdown position-relative">
         <span
           className={`position-absolute top-0 start-100 translate-middle p-2 rounded-circle ${
-            countUnread === 0 ? "bg-secondary" : "bg-danger border border-light"
+            countUnread === 0
+              ? "bg-secondary"
+              : "bg-danger border border-light"
           }`}
         >
           <span className="visually-hidden">New alerts</span>
@@ -93,13 +101,14 @@ export default function NotificationToast() {
           className="dropdown-menu dropdown-menu-dark"
           aria-labelledby="dropdownMenuButton2"
         >
-          {notifications}
-          {notifications?.length === 0 && 
-            <li>
-              <a className="dropdown-item disabled" href="#">
-                Sem notificações
-              </a>
-            </li>
+          { notifications }
+          {
+            notifications?.length === 0 &&
+              <li>
+                <a className="dropdown-item disabled" href="#">
+                  Sem notificações
+                </a>
+              </li>
           }
           <li>
             <hr className="dropdown-divider" />

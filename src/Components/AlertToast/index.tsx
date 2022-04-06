@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-type AlertProps = {
+interface AlertProps {
   show: boolean;
   close: () => void;
   message: string;
@@ -28,20 +28,19 @@ export default function AlertToast(props: AlertProps) {
     setTimeout(() => props.close(), props.timing ? props.timing : 5000);
   }, [props.level]);
 
-  return props.show ? (
-    <div className="position-fixed bottom-0 start-50 translate-middle-x p-3" style={{ zIndex: 11 }}>
-      <div className={`rounded shadow ${bgColor}`}>
-        <div className="d-flex">
-          <div className="toast-body">{props.message}</div>
-          <button
-            onClick={props.close}
-            type="button"
-            className="btn-close me-2 m-auto"
-          ></button>
+  return props.show
+    ? <div className="position-fixed bottom-0 start-50 translate-middle-x p-3" style={{ zIndex: 11 }}>
+        <div className={`rounded shadow ${bgColor}`}>
+          <div className="d-flex">
+            <div className="toast-body">{props.message}</div>
+            <button
+              onClick={props.close}
+              type="button"
+              className="btn-close me-2 m-auto"
+            ></button>
+          </div>
         </div>
       </div>
-    </div>
-  ) : (
-    <></>
-  );
+    : <></>
+  ;
 }

@@ -104,7 +104,7 @@ export default function SignIn() {
             <img
               src="images/signin.png"
               className="d-block mx-lg-auto img-fluid"
-              alt="Login"
+              alt="Cadastre-se"
               width="700"
               height="500"
               loading="lazy"

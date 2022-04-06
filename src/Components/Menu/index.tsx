@@ -2,7 +2,21 @@ import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { parseCookies, destroyCookie } from "nookies";
 import { UserContext } from "../../Context";
-import { NavItemLogin, ToggleIcon } from "./components";
+import { NavItemLogin } from "./components";
+
+const ToggleIcon = (
+  <button
+    className="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span className="navbar-toggler-icon"></span>
+  </button>
+);
 
 export default function Menu() {
   const { user, setUser } = useContext(UserContext);
@@ -44,10 +58,11 @@ export default function Menu() {
         <Link className="navbar-brand" to="/">
           To do List
         </Link>
-        <ToggleIcon />
+        { ToggleIcon }
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            {user?.token != null && (
+            {
+              user?.token != null && 
                 <li className="nav-item">
                   <Link
                     className="nav-link active"
@@ -57,14 +72,14 @@ export default function Menu() {
                     Dashboard
                   </Link>
                 </li>
-            )}
+            }
           </ul>
           <ul className="navbar-nav mb-2 mb-lg-0" style={{ cursor: "pointer" }}>
-            {user?.token == null ? (
-              <NavItemLogin text="Login" />
-            ) : (
-              <NavItemLogin text="Sair" func={() => logout()} />
-            )}
+            {
+              user?.token == null
+                ? <NavItemLogin text="Login" />
+                : <NavItemLogin text="Sair" func={() => logout()} />
+            }
           </ul>
         </div>
       </div>
