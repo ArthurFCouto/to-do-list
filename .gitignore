@@ -11,8 +11,8 @@
 # production
 /build
 
-# variables
-.env
+# environment variables
+/*.env
 
 # misc
 .DS_Store

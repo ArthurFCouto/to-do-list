@@ -297,11 +297,12 @@ export function ModalTask(props: ModalProps) {
   const [body, setBody] = useState<Array<ReactElement> | ReactElement>();
   useEffect(() => {
     setBody(
-      props.tasks.map((task: Task) => (
+      props.tasks.map((task: Task, index: number) => (
         <a
           href="#"
           className="list-group-item list-group-item-action d-flex gap-3 py-3"
           aria-current="true"
+          key={index}
         >
           <img
             src="images/task.png"

@@ -138,7 +138,7 @@ export default function Login() {
                   className="form-check-input"
                   id="remember"
                   name="remember"
-                  checked={true}
+                  defaultChecked={true}
                 />
                 <label className="form-check-label" htmlFor="remember">
                   Manter sessão aberta

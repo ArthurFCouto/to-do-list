@@ -1,7 +1,7 @@
 # To-Do-List
 # ReactJS + typescript + Bootstrap
 
-Para utilizar a aplicação, seguir tutorial abaixo. Esta aplicação será hospedada na plataforma vercel.
+Siga o tutorial abaixo para utilizar esta aplicação. Esta aplicação será hospedada na plataforma vercel.
 
 ## Ambiente e Ferramentas:
 
@@ -37,7 +37,7 @@ $ mkdir tasklistapi
 $ cd tasklistapi
 ```
 
-Dentro da pasta, clone este repositório:
+Dentro da pasta, clone orepositório:
 
 ```bash
 # Clonando este repositório
@@ -48,19 +48,21 @@ Siga as orientações do README e execute o back-end:
 
 `$ npm run dev`
 
-Se tudo correu bem, você poderá acessar a rota inicial do back-end via: ***GET http://localhost:3030***.
+Se tudo correu bem, você poderá acessar a rota inicial do back-end via: ***POST http://localhost:3030/user***.
 
 ## **3. Executando o To-Do-List**
 
 Para rodar esse projeto, você vai precisar adiciona a seguinte variável de ambiente no seu **.env**.
 
-`REACT_BASE_URL`
+`REACT_APP_BASE_URL`
 
-Caso esteja utilizando o heroku, colocar a url de hospedagem de sua API, caso esteja em ambiente de desenvolvimento, utilizar ***localhost:3030***.
+Caso esteja utilizando o heroku, colocar a url de hospedagem de sua API, caso esteja em ambiente de desenvolvimento, utilizar ***http://localhost:3030***.
 
-Agora execute o comando `$ npm start` e veja o programa rodando em http://localhost:3000.
+Agora execute o comando de inicialização e veja o programa rodando em http://localhost:3000.
 
-## **4. Enviando para o GIT**
+`$ npm start`
+
+## **4. Enviando para o Github**
 
 Crie um repositório no Github e envie sua aplicação.
 
