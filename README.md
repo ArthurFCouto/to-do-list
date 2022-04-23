@@ -1,46 +1,86 @@
-# Getting Started with Create React App
+# To-Do-List
+# ReactJS + typescript + Bootstrap
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Para utilizar a aplicação, seguir tutorial abaixo. Esta aplicação será hospedada na plataforma vercel.
 
-## Available Scripts
+## Ambiente e Ferramentas:
 
-In the project directory, you can run:
+- Axios: https://axios-http.com/ptbr/docs/intro
+- Nookies: https://github.com/maticzav/nookies
+- Styled Components: https://styled-components.com/
+- Bootstrap: https://getbootstrap.com/docs/5.1/getting-started/introduction/
 
-### `npm start`
+## **1. Configuração do Ambiente**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Crie uma pasta para armazenar o projeto. Você pode nomear e preencher os dados como quiser, este exemplo será nomeado como to-do-list:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```
+$ mkdir to-do-list
+$ cd to-do-list
+```
+Dentro da pasta, clone este repositório:
 
-### `npm test`
+```bash
+# Clonando este repositório
+$ git clone <https://github.com/ArthurFCouto/to-do-list>
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Instalando as dependências
+$ npm install 
+```
 
-### `npm run build`
+## **2. Clonando o back-end**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Crie uma nova pasta, neste caso foi criado uma com o nome tasklistapi:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+$ mkdir tasklistapi
+$ cd tasklistapi
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Dentro da pasta, clone este repositório:
 
-### `npm run eject`
+```bash
+# Clonando este repositório
+$ git clone <https://github.com/ArthurFCouto/tasklistapi>
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Siga as orientações do README e execute o back-end:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`$ npm run dev`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Se tudo correu bem, você poderá acessar a rota inicial do back-end via: ***GET http://localhost:3030***.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## **3. Executando o To-Do-List**
 
-## Learn More
+Para rodar esse projeto, você vai precisar adiciona a seguinte variável de ambiente no seu **.env**.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`REACT_BASE_URL`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Caso esteja utilizando o heroku, colocar a url de hospedagem de sua API, caso esteja em ambiente de desenvolvimento, utilizar ***localhost:3030***.
+
+Agora execute o comando `$ npm start` e veja o programa rodando em http://localhost:3000.
+
+## **4. Enviando para o GIT**
+
+Crie um repositório no Github e envie sua aplicação.
+
+```bash
+# Adicionando todos os arquivos
+$ git add *
+# Criando o primeiro commit
+$ git commit -m "first commit"
+# Adicionando o endereço remoto
+$ git remote add origin HTTPS_FORNECIDO_PELO_GIT
+# Enviando o projeto para o git hub
+$ git push -u origin main
+```
+
+> No Github criar a variável de ambiente com o mesmo valor do arquivo **.env**.
+
+## **5. Hospedando a aplicação**
+
+Abra a ***dashboard*** da plataforma vercel e acesse `new project`.
+
+Conecte a plataforma com o Git e selecione a aplicação correspondente.
+
+Fim.

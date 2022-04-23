@@ -14,6 +14,7 @@ export default function Unauthorized() {
           }}
           alt="Faça login ou cadastre-se"
           className="mx-auto mb-4"
+          loading="lazy"
         />
       <div className="alert alert-danger" role="alert">
         <Link to="/login" className="alert-link">

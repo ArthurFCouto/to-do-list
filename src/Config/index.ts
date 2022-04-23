@@ -1,3 +1,3 @@
 export default {
-    baseUrl: "https://apitasklist.herokuapp.com",
+    baseUrl: process.env.REACT_BASE_URL,
 }

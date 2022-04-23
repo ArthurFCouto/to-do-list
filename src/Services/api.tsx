@@ -13,10 +13,8 @@ export class ApiService {
 
   api() {
     const cookies = parseCookies();
-    if (cookies.USER_TOKEN) {
-      const token = cookies.USER_TOKEN;
-      headers.Authorization = `Bearer ${token}`;
-    }
+    if (cookies.USER_TOKEN) 
+      headers.Authorization = `Bearer ${cookies.USER_TOKEN}`;
     return axios.create({
       baseURL: `${Config.baseUrl}`,
       headers
