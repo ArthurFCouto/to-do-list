@@ -63,7 +63,8 @@ export default function Login() {
   }
 
   useEffect(() => {
-    alertRef.current!.focus();
+    if(alertRef.current)
+      alertRef.current.focus();
   }, [alertProps]);
 
   return (
