@@ -1,46 +1,34 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { parseCookies, destroyCookie } from "nookies";
 import { UserContext } from "../../Context";
-import { NavItemLogin } from "./components";
-
-const ToggleIcon = (
-  <button
-    className="navbar-toggler"
-    type="button"
-    data-bs-toggle="collapse"
-    data-bs-target="#navbarSupportedContent"
-    aria-controls="navbarSupportedContent"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span className="navbar-toggler-icon"></span>
-  </button>
-);
+import { NavItemLogin, ToggleIcon } from "./components";
+import Config from "../../Config";
 
 export default function Menu() {
-  const { user, setUser } = useContext(UserContext);
+  const { logged, loginUser, resetUser } = useContext(UserContext);
+  const { token } = Config;
+
   const logout = () => {
-    if (setUser)
-      setUser({
-        id: null,
-        email: null,
-        name: null,
-        password: null,
-        token: null,
-      });
-    destroyCookie(null, "USER_DATA");
-    destroyCookie(null, "USER_TOKEN");
+    if (resetUser)
+      resetUser();
+    destroyCookie(null, token.USER_DATA);
+    destroyCookie(null, token.USER_TOKEN);
   };
 
-  useEffect(() => {
+  const loading = () => {
     try {
       const cookies = parseCookies();
-      if (cookies.USER_DATA && setUser)
-        setUser(JSON.parse(cookies.USER_DATA));
+      if (cookies.USER_DATA && loginUser)
+        loginUser(JSON.parse(cookies.USER_DATA));
     } catch (error) {
-      console.log(error, logout());
+      console.log("Erro ao recuperar dados do User", error);
+      logout();
     }
+  }
+
+  useEffect(() => {
+    loading();
   }, []);
 
   return (
@@ -58,27 +46,27 @@ export default function Menu() {
         <Link className="navbar-brand" to="/">
           To do List
         </Link>
-        { ToggleIcon }
+        <ToggleIcon />
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             {
-              user?.token != null && 
-                <li className="nav-item">
-                  <Link
-                    className="nav-link active"
-                    aria-current="page"
-                    to="/dashboard"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-            }
+              logged && (
+              <li className="nav-item">
+                <Link
+                  className="nav-link active"
+                  aria-current="page"
+                  to="/dashboard"
+                >
+                  Dashboard
+                </Link>
+              </li>
+            )}
           </ul>
           <ul className="navbar-nav mb-2 mb-lg-0" style={{ cursor: "pointer" }}>
             {
-              user?.token == null
-                ? <NavItemLogin text="Login" />
-                : <NavItemLogin text="Sair" func={() => logout()} />
+              logged
+                ? <NavItemLogin text="Sair" clickFunction={() => logout()} />
+                : <NavItemLogin text="Login" />
             }
           </ul>
         </div>

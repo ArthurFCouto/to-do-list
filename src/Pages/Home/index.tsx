@@ -14,7 +14,7 @@ import {
 } from "./components";
 import AlertToast from "../../Components/AlertToast";
 import NotificationToast from "../../Components/NotificationToast";
-import TaskService from "../../Services/TaskService";
+import TaskService from "../../Service/TaskService";
 
 interface Task {
   id: number;

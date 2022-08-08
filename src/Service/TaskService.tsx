@@ -1,15 +1,13 @@
-import React from "react";
 import { ApiService } from "./api";
-import { axiosResponse } from "./types";
 
-class NotificationService extends ApiService {
-  private url = "/notification"
-  
+class TaskService extends ApiService {
+  private url = "/task";
+
   constructor() {
-    super()
+    super();
   }
 
-  async getAll(): Promise<axiosResponse> {
+  async getAll() {
     return await this.api()
       .get(`${this.url}`)
       .then((response) => {
@@ -20,7 +18,7 @@ class NotificationService extends ApiService {
       });
   }
 
-  async exclude(id: number): Promise<axiosResponse> {
+  async exclude(id: number) {
     return await this.api()
       .delete(`${this.url}/${id}`)
       .then((response) => {
@@ -31,7 +29,22 @@ class NotificationService extends ApiService {
       });
   }
 
-  async update(id: number): Promise<axiosResponse> {
+  async save(task: string, deadline: Date) {
+    const body = {
+      task,
+      deadline
+    }
+    return await this.api()
+      .post(`${this.url}`, body)
+      .then((response) => {
+        return response;
+      })
+      .catch((error) => {
+        return this.error(error);
+      });
+  }
+
+  async update(id: number) {
     return await this.api()
       .put(`${this.url}/${id}`, {})
       .then((response) => {
@@ -43,4 +56,4 @@ class NotificationService extends ApiService {
   }
 }
 
-export default new NotificationService();
+export default new TaskService();

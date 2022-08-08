@@ -1,13 +1,11 @@
-import React from "react";
 import axios from "axios";
 import Config from "../Config";
 import { parseCookies } from "nookies";
-import { axiosResponse } from "./types";
 
 const headers = {
   "Content-Type": "application/json",
   "Authorization": ""
-}
+};
 
 export class ApiService {
 
@@ -21,7 +19,7 @@ export class ApiService {
     });
   }
 
-  error(error: any): axiosResponse {
+  error(error: any) {
     return error.response
       ? error.response
       : 

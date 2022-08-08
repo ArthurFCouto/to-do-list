@@ -1,6 +1,4 @@
-import React from "react";
 import { ApiService } from "./api";
-import { axiosResponse } from "./types";
 
 class UserService extends ApiService {
   private url = "/user";
@@ -9,7 +7,7 @@ class UserService extends ApiService {
     super();
   }
 
-  async getAll(): Promise<axiosResponse> {
+  async getAll() {
     return await this.api()
       .get(`${this.url}`)
       .then((response) => {
@@ -20,7 +18,7 @@ class UserService extends ApiService {
       });
   }
 
-  async exclude(id: number): Promise<axiosResponse> {
+  async exclude(id: number) {
     return await this.api()
       .delete(`${this.url}/${id}`)
       .then((response) => {
@@ -31,7 +29,7 @@ class UserService extends ApiService {
       });
   }
 
-  async getInfo(id: number): Promise<axiosResponse> {
+  async getInfo(id: number) {
     return await this.api()
       .get(`${this.url}/${id}`)
       .then((response) => {

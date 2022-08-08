@@ -1,7 +1,7 @@
 import React, { FormEvent, ReactElement, useEffect, useReducer, useState } from "react";
-import { SpinnerLoading } from "../../Components/Commom/components";
+import Spinner from "../../Components/Spinner";
 import { FormatDateBR, FormatDateEN } from "../../Components/Commom/functions";
-import TaskService from "../../Services/TaskService";
+import TaskService from "../../Service/TaskService";
 
 interface ActivitiesProps {
   id: number;
@@ -115,7 +115,7 @@ export function Activities(props: ActivitiesProps) {
               style={{ cursor: "pointer" }}
               onClick={() => AlterStatus("conclude")}
             >
-              {loading ? <SpinnerLoading color="text-primary" /> : "Concluir"}
+              {loading ? <Spinner color="text-primary" /> : "Concluir"}
             </a>
           :
             <a title="Já concluída">
@@ -140,7 +140,7 @@ export function Activities(props: ActivitiesProps) {
             >
               {
                 loading
-                  ? <SpinnerLoading color="text-primary" />
+                  ? <Spinner color="text-primary" />
                   : "Excluir"
               }
             </a>

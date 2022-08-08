@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { UserContext } from "../../Context";
 import Config from "../../Config";
-import NotificationService from "../../Services/NotificationService";
+import Api from "../../Service";
 
 interface Notify {
   id: number;
@@ -13,19 +13,20 @@ interface Notify {
 export default function NotificationToast() {
   const { user } = useContext(UserContext);
   const [countUnread, setCountUnread] = useState(0);
-  const [notifications, setNotifications] = useState<Array<Element>>();
+  const [notifications, setNotifications] = useState<Array<Element>>([]);
   const { baseUrl } = Config;
   const headers = {
     Accept: `text/event-stream`,
     Authorization: `Bearer ${user?.token}`,
   };
-  const Notification = async () => {
-    const response = await NotificationService.getAll();
+  const notification = async () => {
+    const response = await Api.init().notification().get();
     if (response.status === 200) {
-      const unread = response.data.filter((notify: Notify) => !notify.read);
+      const { data } = response;
+      const unread = data.filter((notify: Notify) => !notify.read);
       setCountUnread(unread.length);
       setNotifications(
-        response.data
+        data
           .reverse()
           .slice(0, 5)
           .map((notify: Notify, index: number) => (
@@ -35,9 +36,7 @@ export default function NotificationToast() {
                 href="#"
               >
                 <span
-                  className={`d-inline-block rounded-circle ${
-                    !notify.read ? "bg-danger" : "bg-primary"
-                  }`}
+                  className={ `d-inline-block rounded-circle ${ !notify.read ? "bg-danger" : "bg-primary" }`}
                   style={{ width: ".5em", height: ".5em" }}
                 />
                 &nbsp;{notify.title}
@@ -54,23 +53,25 @@ export default function NotificationToast() {
       headers,
       async onopen(res) {
         if (res.ok && res.status === 200) {
-          console.log("Connection made ", res);
+          console.log("Conecção estabelecida", res);
         } else {
-          console.log("Client side error ", res);
+          console.log("Erro durante a conexão", res);
         }
       },
       onmessage(event) {
-        //const data = JSON.parse(event.data);
-        Notification();
+        // const data = JSON.parse(event.data);
+        notification();
       },
-      onclose() {
-        //console.log("Connection closed by the server");
-      },
-      onerror(err) {
-        //console.log("There was an error from server", err);
-      },
+      /* 
+       * onclose() {
+       *   console.log("Connection closed by the server");
+       * },
+       * onerror(err) {
+       *   console.log("There was an error from server", err);
+       * },
+       */
     });
-    Notification();
+    notification();
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import { SpinnerLoading } from "../../Components/Commom/components";
+import Spinner from "../../Components/Spinner";
 
 interface Props {
   children: React.ReactNode;
@@ -131,7 +131,7 @@ export function LineCustomer(props: LineErrorProps) {
   const lineLoading = (
     <tr>
       <th scope="row">
-        <SpinnerLoading />
+        <Spinner />
       </th>
       <td colSpan={props.colSpan}>{loadingText}</td>
     </tr>

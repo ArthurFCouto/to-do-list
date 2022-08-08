@@ -1,38 +1,55 @@
-//Contém comentários com observações para o uso do useContext com typescript
-import React, { useState, createContext } from "react";
+/*
+ * Contém comentários com observações sobre o uso do useContext com typescript
+ */
 
-//Serão variáveis de contexto o user(objeto) e setUser(função)
+import React, { useState, createContext } from 'react';
 
-//Definição da interface(modelo) que será o objeto user
+/*
+ * Serão variáveis de contexto o user(objeto) e setUser(função)
+ *
+ * Primeiro é definido a interface do objeto USER
+ * Logo após a definição do tipo de contexto, onde é apontado as variáveis/funções que serão acessadas
+ * Depois é feita a exportação do contexto, é usado o Partial para criar um contexto nulo/vazio
+ * Como foi criado um oontexto nulo, ao acessar as variáveis do contexto é preciso verificar a integridade do conteúdo
+ * 
+ */
+
 interface User {
-    id: number | null
-    email: string | null;
-    name: string | null;
-    password: string | null;
-    token: string | null;
+    id: number;
+    email: string;
+    name: string;
+    password: string;
+    token: string;
 };
 
-//Definição do tipo do contexto, informando as variáveis/funções que poderão ser acessadas
 type Context = {
     user: User;
-    setUser: React.Dispatch<any>;
+    logged: boolean;
+    resetUser: () => void;
+    loginUser: (props: User)=> void;
 }
 
-//Feita a exportação do contexto com o tipo definido acima (o uso do Partial é para criar um contexto nulo/vazio)
 export const UserContext = createContext<Partial<Context>>({}); 
 
-//Criação do tipo props para poder receber o children
+// Criação do tipo Props para receber o children
 type Props = {
   children: React.ReactNode
 }
 
-function UserProvider({children}: Props) {
-  //Como foi utilizado o Partial, ao acessar as variáveis do contexto é preciso verificar se não são nulas
+const UserProvider = ({children}: Props)=> {
   const [user, setUser] = useState<User>();
-
+  const [logged, setLogged] = useState<boolean>(false);
+  const resetUser = () => {
+    setLogged(false);
+    setUser(undefined);
+  }
+  const loginUser = (props: User) => {
+    setLogged(true);
+    setUser(props);
+  }
   return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
+    <UserContext.Provider value={{ user, logged, resetUser, loginUser }}>
+      { children }
     </UserContext.Provider>
   );
 }

@@ -2,12 +2,12 @@ import React, { useReducer, useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { setCookie } from "nookies";
 import { UserContext } from "../../Context";
-import SessionService from "../../Services/SessionService";
-import UserService from "../../Services/UserService";
+import SessionService from "../../Service/SessionService";
+import UserService from "../../Service/UserService";
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
+  const { loginUser } = useContext(UserContext);
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
@@ -62,7 +62,7 @@ export default function SignIn() {
         password: password,
         token,
       };
-      if (setUser) setUser(newUser);
+      if (loginUser) loginUser(newUser);
       setCookie(null, "USER_TOKEN", token, {
         maxAge: 604800,
         path: "/",

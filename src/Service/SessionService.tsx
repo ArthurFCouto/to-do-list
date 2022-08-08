@@ -1,6 +1,4 @@
-import React from "react";
 import { ApiService } from "./api";
-import { axiosResponse } from "./types";
 
 class SessionService extends ApiService {
   constructor() {
@@ -10,7 +8,7 @@ class SessionService extends ApiService {
   async session(
     email: string | undefined,
     password: string | undefined
-  ): Promise<axiosResponse> {
+  ) {
     const body = {
       email,
       password

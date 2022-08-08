@@ -1,91 +1,70 @@
-import React, { useReducer, useState, useContext, FormEvent } from "react";
-import { setCookie } from "nookies";
+import { useReducer, useState, useContext, FormEvent, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import SessionService from "../../Services/SessionService";
+import { AlertError, AlterClass, SaveCookie } from "./functions";
+import Api from "../../Service";
+import { ServiceResponse } from "../../Service/types";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
-  const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState("");
-  const [alterClass, dispatchAlter] = useReducer(Alter, {
+  const { loginUser } = useContext(UserContext);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const initialAlertProps = {
     class: "alert-primary",
     aria: "Info:",
     icon: "#info-fill",
-  });
-  function Alter(state: any, action: any) {
-    switch (action.status) {
-      case "info":
-        return {
-          class: "alert-primary",
-          aria: "Info:",
-          icon: "#info-fill",
-        };
-      case 200:
-        return {
-          class: "alert-success",
-          aria: "Success:",
-          icon: "#check-circle-fill",
-        };
-      case 400:
-        return {
-          class: "alert-warning",
-          aria: "Warning:",
-          icon: "#exclamation-triangle-fill",
-        };
-      case 404:
-      case 500:
-        return {
-          class: "alert-danger",
-          aria: "Danger:",
-          icon: "#exclamation-triangle-fill",
-        };
-      default:
-        throw new Error();
-    }
+    message: "",
+  };
+  const [alertProps, alterAlertProps] = useReducer(AlterClass, initialAlertProps);
+  const alertRef = useRef<HTMLButtonElement>(null);
+
+  const redirect = async (response: ServiceResponse, email: string, password: string, remember: string) => {
+    const { user, token } = response.data;
+    const newUser = {
+      id: user.id,
+      email,
+      name: user.name,
+      password,
+      token,
+    };
+    if (loginUser)
+      loginUser(newUser);
+    alterAlertProps({
+      status: response.status,
+      message: `Bem vindo (a) ${user.name}! Redirecionando...`,
+    });
+    await SaveCookie("USER_TOKEN", token);
+    if (remember === "on")
+      await SaveCookie("USER_DATA", JSON.stringify(newUser));
+    navigate("/");
   }
 
-  const Login = async (e: FormEvent<HTMLFormElement>) => {
+  const login = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const body = {
-      email: data.get("email")?.toString(),
-      password: data.get("password")?.toString(),
-      remember: data.get("remember"),
+      email: String(data.get("email")),
+      password: String(data.get("password")),
+      remember: String(data.get("remember")),
     };
-    dispatchAlter({ status: "info" });
-    setMessage("Aguarde, validando seus dados...");
-    setVisible(true);
-    const response = await SessionService.session(body.email, body.password);
-    if (response.status === 200) {
-      dispatchAlter({ status: response.status });
-      const { user, token } = response.data;
-      const newUser = {
-        id: user.id,
-        email: body.email,
-        name: user.name,
-        password: body.password,
-        token,
-      };
-      if (setUser) setUser(newUser);
-      setMessage(`Bem vindo (a) ${user.name}! Redirecionando...`);
-      setCookie(null, "USER_TOKEN", token, {
-        maxAge: 604800,
-        path: "/",
-      });
-      if (body.remember)
-        setCookie(null, "USER_DATA", JSON.stringify(newUser), {
-          maxAge: 604800,
-          path: "/",
-        });
-      setTimeout(() => navigate("/"), 800);
-    } else {
-      const { status, data } = response;
-      dispatchAlter({ status });
-      setMessage(`Ops! ${data ? data.error : response.statusText}`);
-    }
-  };
+    alterAlertProps({
+      status: 100,
+      message: "Aguarde, validando seus dados...",
+    });
+    setShowAlert(true);
+    const response = await Api.init().session().post({
+      email: body.email,
+      password: body.password
+    });
+    if (!response.error)
+      redirect(response, body.email, body.password, body.remember);
+    else
+      AlertError(response, alterAlertProps);
+  }
+
+  useEffect(() => {
+    alertRef.current!.focus();
+  }, [alertProps]);
 
   return (
     <div className="container">
@@ -102,7 +81,7 @@ export default function Login() {
             />
           </div>
           <div className="col-lg-6">
-            <form onSubmit={(e) => Login(e)}>
+            <form onSubmit={(e) => login(e)}>
               <h1 className="h3 mb-3 fw-normal">Entre com sua conta</h1>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
@@ -166,31 +145,34 @@ export default function Login() {
           </div>
         </div>
       </div>
-      {visible && (
-        <div
-          className={`alert ${alterClass.class} d-flex align-items-center`}
-          role="alert"
-          style={{ position: "relative" }}
-        >
-          <svg
-            className="bi flex-shrink-0 me-2"
-            width="24"
-            height="24"
-            role="img"
-            aria-label={alterClass.aria}
+      {
+        showAlert && (
+          <div
+            className={`alert ${alertProps.class} d-flex align-items-center`}
+            role="alert"
+            style={{ position: "relative" }}
           >
-            <use xlinkHref={alterClass.icon} />
-          </svg>
-          <div>{message}</div>
-          <button
-            type="button"
-            className="btn-close"
-            aria-label="Close"
-            style={{ right: "10px", position: "absolute" }}
-            onClick={() => setVisible(false)}
-          />
-        </div>
-      )}
+            <svg
+              className="bi flex-shrink-0 me-2"
+              width="24"
+              height="24"
+              role="img"
+              aria-label={alertProps.aria}
+            >
+              <use xlinkHref={alertProps.icon} />
+            </svg>
+            <div>{alertProps.message}</div>
+            <button
+              type="button"
+              className="btn-close"
+              aria-label="Close"
+              style={{ right: "10px", position: "absolute" }}
+              onClick={() => setShowAlert(false)}
+              ref={alertRef}
+            />
+          </div>
+        )
+      }
     </div>
   );
 }

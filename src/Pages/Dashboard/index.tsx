@@ -9,9 +9,9 @@ import {
   OptionsNotify,
   OptionsTask,
 } from "./components";
-import NotificationService from "../../Services/NotificationService";
-import UserService from "../../Services/UserService";
-import TaskService from "../../Services/TaskService";
+import NotificationService from "../../Service/NotificationService";
+import UserService from "../../Service/UserService";
+import TaskService from "../../Service/TaskService";
 
 interface Task {
   id: number;
