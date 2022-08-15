@@ -20,7 +20,7 @@ export default function NotificationToast() {
     Authorization: `Bearer ${user?.token}`,
   };
   const notification = async () => {
-    const response = await Api.init().notification().get();
+    const response = await Api.init('notification').get();
     if (response.status === 200) {
       const { data } = response;
       const unread = data.filter((notify: Notify) => !notify.read);

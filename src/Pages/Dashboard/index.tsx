@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext, useEffect, useState } from "react";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import { SectionCenterStyled } from "../../Components/Commom/styles";
 import { FormatDateBR } from "../../Components/Commom/functions";
 import { UserContext } from "../../Context";
@@ -9,9 +9,7 @@ import {
   OptionsNotify,
   OptionsTask,
 } from "./components";
-import NotificationService from "../../Service/NotificationService";
-import UserService from "../../Service/UserService";
-import TaskService from "../../Service/TaskService";
+import Api from "../../Service";
 
 interface Task {
   id: number;
@@ -71,32 +69,32 @@ export default function Dashboard() {
   );
 
   const DeleteTask = async (id: number) => {
-    const response = await TaskService.exclude(id);
+    const response = await Api.init('task').delete(id);
     response.status === 200 ? FillTasks() : console.log(response.data);
   };
 
   const ConcludeTask = async (id: number) => {
-    const response = await TaskService.update(id);
+    const response = await Api.init('task').update(id, {});
     response.status === 200 ? FillTasks() : console.log(response.data);
   };
 
   const DeleteUser = async (id: number) => {
-    const response = await UserService.exclude(id);
+    const response = await Api.init('user').delete(id);
     response.status === 200 ? FillUser() : console.log(response.data);
   };
 
   const DeleteNotification = async (id: number) => {
-    const response = await NotificationService.exclude(id);
+    const response = await Api.init("notification").delete(id);
     response.status === 200 ? FillNotifications() : console.log(response.data);
   };
 
   const ReadNotification = async (id: number) => {
-    const response = await NotificationService.update(id);
+    const response = await Api.init("notification").update(id, {});
     response.status === 200 ? FillNotifications() : console.log(response.data);
   };
 
   async function FillTasks() {
-    const response = await TaskService.getAll();
+    const response = await Api.init('task').get();
     if (response.status === 200) setTasks(response.data);
     else {
       console.log(response.data);
@@ -111,7 +109,7 @@ export default function Dashboard() {
   }
 
   async function FillUser() {
-    const response = await UserService.getAll();
+    const response = await Api.init("user").get();
     if (response.status === 200) setUser(response.data);
     else {
       console.log(response.data);
@@ -126,7 +124,7 @@ export default function Dashboard() {
   }
 
   async function FillNotifications() {
-    const response = await NotificationService.getAll();
+    const response = await Api.init('notification').get();
     if (response.status === 200) setNotifications(response.data);
     else {
       console.log(response.data);

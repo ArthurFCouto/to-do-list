@@ -1,20 +1,20 @@
-import axios, { AxiosInstance } from "axios";
-import Config from "../Config";
-import { parseCookies } from "nookies";
-import { Body, Headers, ServiceResponse } from "./types";
-import { modelResponseError } from "../Util";
+import axios, { AxiosInstance } from 'axios';
+import { parseCookies } from 'nookies';
+import { Body, Headers, ServiceResponse, ServiceRoute } from './types';
+import { modelResponseError } from '../Util';
+import Config from '../Config';
 
 class ApiService {
     request: AxiosInstance;
     url: string;
 
-    constructor(request: AxiosInstance) {
+    constructor(request: AxiosInstance, service: ServiceRoute) {
         this.request = request;
-        this.url = "/";
+        this.url = `/${service}`;
     }
 
-    static init() {
-        const headers: Headers = { "Content-Type": "application/json" };
+    static init(service: ServiceRoute) {
+        const headers: Headers = { 'Content-Type': 'application/json' };
         const cookies = parseCookies();
         if (cookies.USER_TOKEN)
             headers.Authorization = `Bearer ${cookies.USER_TOKEN}`;
@@ -22,25 +22,7 @@ class ApiService {
             baseURL: `${Config.baseUrl}`,
             headers
         });
-        return new this(request);
-    }
-
-    notification() {
-        this.url = "/notification";
-        return this;
-    }
-
-    session() {
-        this.url = "/session";
-        return this;
-    }
-
-    task() {
-        this.url = "/task";
-    }
-
-    user() {
-        this.url = "/user";
+        return new this(request, service);
     }
 
     async get(): Promise<ServiceResponse> {

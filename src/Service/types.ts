@@ -1,7 +1,7 @@
-import { AxiosResponse } from "axios";
+import { AxiosResponse } from 'axios';
 
 export type Headers = {
-  "Content-Type": string;
+  'Content-Type': string;
   Authorization?: string;
 }
 
@@ -26,3 +26,5 @@ interface Login {
 }
 
 export type Body = User | Task | Login;
+
+export type ServiceRoute = "notification" | "session" | "user" | "task";

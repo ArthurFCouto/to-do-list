@@ -1,174 +1,140 @@
-import React, { useReducer, useState, useContext, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { setCookie } from "nookies";
-import { UserContext } from "../../Context";
-import SessionService from "../../Service/SessionService";
-import UserService from "../../Service/UserService";
+import { useReducer, useState, useContext, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../Context';
+import { AlertError, AlterClass, SaveCookie } from '../../Util';
+import Api from '../../Service';
+import Config from '../../Config';
 
 export default function SignIn() {
   const navigate = useNavigate();
   const { loginUser } = useContext(UserContext);
-  const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [alterClass, dispatchAlter] = useReducer(Alter, {
-    class: "alert-primary",
-    aria: "Info:",
-    icon: "#info-fill",
-  });
-  function Alter(state: any, action: any) {
-    switch (action.status) {
-      case "info":
-        return {
-          class: "alert-primary",
-          aria: "Info:",
-          icon: "#info-fill",
-        };
-      case 200:
-        return {
-          class: "alert-success",
-          aria: "Success:",
-          icon: "#check-circle-fill",
-        };
-      case 400:
-        return {
-          class: "alert-warning",
-          aria: "Warning:",
-          icon: "#exclamation-triangle-fill",
-        };
-      case 404:
-      case 500:
-        return {
-          class: "alert-danger",
-          aria: "Danger:",
-          icon: "#exclamation-triangle-fill",
-        };
-      default:
-        throw new Error();
-    }
-  }
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const initialAlertProps = {
+    class: 'alert-primary',
+    aria: 'Info:',
+    icon: '#info-fill',
+    message: '',
+  };
+  const [alertProps, alterAlertProps] = useReducer(AlterClass, initialAlertProps);
 
-  async function Redirect() {
-    const response = await SessionService.session(email, password);
-    if (response.status === 200) {
-      dispatchAlter({ status: response.status });
-      const { user, token } = response.data;
-      const newUser = {
-        id: user.id,
-        email: email,
-        name: user.name,
-        password: password,
+  const redirect = async (email: string, password: string) => {
+    const response = await Api.init('session').post({ email, password });
+    const { data, status } = response;
+    if (!response.error) {
+      const { user: { id, name }, token } = data;
+      alterAlertProps({
+        status,
+        message: `Bem vindo (a) ${name}!`,
+      });
+      const user = {
+        id,
+        email,
+        name,
+        password,
         token,
       };
-      if (loginUser) loginUser(newUser);
-      setCookie(null, "USER_TOKEN", token, {
-        maxAge: 604800,
-        path: "/",
-      });
-      setCookie(null, "USER_DATA", JSON.stringify(newUser), {
-        maxAge: 604800,
-        path: "/",
-      });
-      setTimeout(() => navigate("/"), 800);
+      if (loginUser)
+        loginUser(user);
+      await SaveCookie(Config.token.USER_TOKEN, token);
+      await SaveCookie(Config.token.USER_DATA, JSON.stringify(user));
+      navigate('/');
     } else {
-      const { status, data } = response;
-      dispatchAlter({ status });
-      setMessage(`Ops! ${data ? data.error : response.statusText}`);
+      AlertError(response, alterAlertProps);
     }
   }
 
-  const Register = async (e: FormEvent) => {
+  const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMessage("Aguarde, validando seus dados...");
-    dispatchAlter({ status: "info" });
-    setVisible(true);
-    const response = await UserService.save(name, email, password);
-    if (response.status === 200) {
-      dispatchAlter({ status: response.status });
-      setMessage(`Bem vindo (a) ${name}! Redirecionando...`);
-      Redirect();
-    } else {
-      const { status, data } = response;
-      dispatchAlter({ status });
-      setMessage(`Ops! ${data ? data.error : response.statusText}`);
-    }
+    const formData = new FormData(e.currentTarget);
+    const email = String(formData.get('email'));
+    const password = String(formData.get('password'));
+    const name = String(formData.get('name'));
+    alterAlertProps({
+      status: 100,
+      message: 'Aguarde, validando seus dados...',
+    })
+    setShowAlert(true);
+    const response = await Api.init('user').post({
+      name,
+      email,
+      password
+    });
+    if (!response.error)
+      redirect(email, password);
+    else
+      AlertError(response, alterAlertProps);
   };
 
   return (
-    <div className="container">
-      <div className="col-xxl-8 px-4 py-5">
-        <div className="row flex-lg-row-reverse align-items-center g-5">
-          <div className="col-10 col-sm-8 col-lg-6 mx-auto">
+    <div className='container'>
+      <div className='col-xxl-8 px-4 py-5'>
+        <div className='row flex-lg-row-reverse align-items-center g-5'>
+          <div className='col-10 col-sm-8 col-lg-6 mx-auto'>
             <img
-              src="images/signin.png"
-              className="d-block mx-lg-auto img-fluid"
-              alt="Cadastre-se"
-              width="700"
-              height="500"
-              loading="lazy"
+              src='images/signin.png'
+              className='d-block mx-lg-auto img-fluid'
+              alt='Cadastre-se'
+              width='700'
+              height='500'
+              loading='lazy'
             />
           </div>
-          <div className="col-lg-6">
-            <form onSubmit={(e) => Register(e)}>
-              <h1 className="h3 mb-3 fw-normal">Cadastre-se</h1>
-              <div className="row mb-3">
-                <label htmlFor="name" className="col-sm-2 col-form-label">
+          <div className='col-lg-6'>
+            <form onSubmit={(e) => register(e)}>
+              <h1 className='h3 mb-3 fw-normal'>Cadastre-se</h1>
+              <div className='row mb-3'>
+                <label htmlFor='name' className='col-sm-2 col-form-label'>
                   Nome
                 </label>
-                <div className="col-sm-10">
+                <div className='col-sm-10'>
                   <input
-                    type="text"
-                    className="form-control"
-                    id="name"
+                    type='text'
+                    className='form-control'
+                    id='name'
                     required
-                    onChange={(e) => setName(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="row mb-3">
-                <label htmlFor="email" className="col-sm-2 col-form-label">
+              <div className='row mb-3'>
+                <label htmlFor='email' className='col-sm-2 col-form-label'>
                   Email
                 </label>
-                <div className="col-sm-10">
+                <div className='col-sm-10'>
                   <input
-                    type="email"
-                    className="form-control"
-                    id="email"
+                    type='email'
+                    className='form-control'
+                    id='email'
                     required
-                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="row mb-3">
-                <label htmlFor="password" className="col-sm-2 form-label">
+              <div className='row mb-3'>
+                <label htmlFor='password' className='col-sm-2 form-label'>
                   Senha
                 </label>
-                <div className="col-sm-10">
+                <div className='col-sm-10'>
                   <input
-                    type="password"
-                    className="form-control"
-                    id="password"
+                    type='password'
+                    className='form-control'
+                    id='password'
                     required
-                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="mb-3 form-text" style={{ textAlign: "end" }}>
+              <div className='mb-3 form-text' style={{ textAlign: 'end' }}>
                 Fique tranquilo, nunca compartilharemos seus dados.
               </div>
               <div
                 style={{
-                  display: "flex",
-                  columnGap: "10px",
-                  justifyContent: "flex-end",
+                  display: 'flex',
+                  columnGap: '10px',
+                  justifyContent: 'flex-end',
                 }}
               >
-                <button type="reset" className="btn btn-light">
+                <button type='reset' className='btn btn-light' title='Limpar'>
                   Limpar
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type='submit' className='btn btn-primary' title='Cadastrar'>
                   Cadastrar
                 </button>
               </div>
@@ -176,34 +142,37 @@ export default function SignIn() {
           </div>
         </div>
       </div>
-      {visible && (
-        <div
-          className={`alert ${alterClass.class} d-flex align-items-center`}
-          role="alert"
-          style={{ position: "relative" }}
-        >
-          <svg
-            className="bi flex-shrink-0 me-2"
-            width="24"
-            height="24"
-            role="img"
-            aria-label={alterClass.aria}
+      {
+        showAlert && (
+          <div
+            className={`alert ${alertProps.class} d-flex align-items-center`}
+            role='alert'
+            style={{ position: 'relative' }}
           >
-            <use xlinkHref={alterClass.icon} />
-          </svg>
-          <div>{message}</div>
-          <button
-            type="button"
-            className="btn-close"
-            aria-label="Close"
-            style={{
-              right: "10px",
-              position: "absolute",
-            }}
-            onClick={() => setVisible(false)}
-          />
-        </div>
-      )}
+            <svg
+              className='bi flex-shrink-0 me-2'
+              width='24'
+              height='24'
+              role='img'
+              aria-label={alertProps.aria}
+            >
+              <use xlinkHref={alertProps.icon} />
+            </svg>
+            <div>{alertProps.message}</div>
+            <button
+              type='button'
+              className='btn-close'
+              aria-label='Close'
+              title='Close'
+              style={{
+                right: '10px',
+                position: 'absolute',
+              }}
+              onClick={() => setShowAlert(false)}
+            />
+          </div>
+        )
+      }
     </div>
   );
 }

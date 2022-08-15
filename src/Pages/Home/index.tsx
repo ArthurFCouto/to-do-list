@@ -1,71 +1,30 @@
-import React, {
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  Activities,
-  Breadcumb,
-  CardBody,
-  FormIncludeTask,
-  ModalTask,
-} from "./components";
-import AlertToast from "../../Components/AlertToast";
-import NotificationToast from "../../Components/NotificationToast";
-import TaskService from "../../Service/TaskService";
-
-interface Task {
-  id: number;
-  check: boolean;
-  createdAt: string;
-  deadline: Date;
-  task: string;
-  updatedAt: string;
-};
-
-type BodyTask = Omit<Task, 'id' | 'check' | 'createdAt' | 'updatedAt' >;
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { Activities, Breadcumb, CardBody, FormIncludeTask, ModalTask } from './components';
+import AlertToast from '../../Components/AlertToast';
+import NotificationToast from '../../Components/NotificationToast';
+import { AlertError, AlertReducer } from './functions';
+import { BodyTask, Task } from './types';
+import Api from '../../Service';
 
 export default function Home() {
-  const form = useRef<any>(null);
-  const [taskPending, setTaskPending] = useState([]);
-  const [taskCompleted, setTaskCompleted] = useState([]);
-  const [alert, dispatchAlert] = useReducer(Alert, {
+  const formRef = useRef<HTMLDivElement>(null);
+  const [taskPending, setTaskPending] = useState<Array<Task>>([]);
+  const [taskCompleted, setTaskCompleted] = useState<Array<Task>>([]);
+  const initialAlertProps = {
     show: true,
-    message: "Aguarde enquanto carregamos as atividades...",
-    error: "",
-    level: "info",
-  });
-
-  function Alert(state: any, action: any) {
-    switch (action.display) {
-      case true:
-        return {
-          show: true,
-          message: action.message,
-          error: action.error,
-          level: action.level,
-        };
-      case false:
-        return {
-          show: false,
-          message: "",
-          error: "",
-          level: "info",
-        };
-      default:
-        throw new Error();
-    }
-  }
+    message: 'Aguarde enquanto carregamos as atividades...',
+    error: '',
+    level: 'info',
+  };
+  const [alert, alterAlert] = useReducer(AlertReducer, initialAlertProps);
 
   const taskMap = (
     tasks: Array<Task>,
-    status: "pending" | "completed",
-    slice: number
+    status: 'pending' | 'completed',
+    limit: number
   ) =>
     tasks
-      .slice(0, slice)
+      .slice(0, limit)
       .map((task: Task, index: number) => (
         <Activities
           key={index}
@@ -76,115 +35,111 @@ export default function Home() {
           status={status}
           task={task.task}
           updatedAt={task.updatedAt}
+          setAlert={(error: any, message: string)=> AlertError(error, message, alterAlert)}
         />
       ));
 
-  const errorCatch = (error: any, message: string) => {
-    const { statusText, data } = error;
-    dispatchAlert({
-      display: true,
-      message: message,
-      error: `${statusText} - ${data.error}`,
-      level: "danger",
-    });
-  };
-
-  const level = useMemo(()=> alert.level, [alert]);
-  const taskModal = useMemo(()=> taskPending.concat(taskCompleted), [taskPending, taskCompleted]);
-
-  async function Include(body: BodyTask) {
-    dispatchAlert({
-      display: true,
-      message: "Aguarde, cadastrando atividade...",
-      error: "",
-      level: "info",
-    });
-    window.scrollTo(0, 0);
-    const response = await TaskService.save(body.task, body.deadline);
-    if(response.status === 200) {
-      dispatchAlert({
-        display: true,
-        message: "Atividade cadastrada com sucesso!",
-        error: "",
-        level: "success",
-      });
-      FillTasks();
-    } else
-      errorCatch(response, "Ops. Houve um erro ao cadastrar atividade.");
-  }
-
-  async function FillTasks() {
-    const response = await TaskService.getAll();
-    if(response.status === 200) {
+  const fillTasks = async () => {
+    const response = await Api.init('task').get();
+    if (!response.error) {
       const { data } = response;
       setTaskCompleted(data.filter((task: Task) => task.check));
       setTaskPending(data.filter((task: Task) => !task.check));
-      dispatchAlert({ display: false });
-    } else
-      errorCatch(response, "Ops. Houve um erro ao carregar as atividades.");
+      alterAlert({ display: false });
+    } else {
+      AlertError(response, 'Ops. Houve um erro ao carregar as atividades.', alterAlert);
+    }
   }
 
+  const include = async (body: BodyTask) => {
+    window.scrollTo(0, 0);
+    alterAlert({
+      display: true,
+      message: 'Aguarde, cadastrando atividade...',
+      error: '',
+      level: 'info',
+    });
+    const { task, deadline } = body;
+    const response = await Api.init('task').post({ task, deadline });
+    if (!response.error) {
+      alterAlert({
+        display: true,
+        message: 'Atividade cadastrada com sucesso!',
+        error: '',
+        level: 'success',
+      });
+      fillTasks();
+    } else {
+      AlertError(response, 'Ops. Houve um erro ao cadastrar atividade.', alterAlert);
+    }
+  }
+
+  const level = useMemo(() => alert.level, [alert]);
+  const taskModal = useMemo(() => taskPending.concat(taskCompleted), [taskPending, taskCompleted]);
+
   useEffect(() => {
-    FillTasks();
+    fillTasks();
   }, []);
 
   return (
-    <div className="container">
+    <div className='container'>
       <Breadcumb
-        title="To-do-list"
-        subTitle="Since 2022"
-        update={() => FillTasks()}
+        title='To-do-list'
+        subTitle='Since 2022'
+        update={() => fillTasks()}
         focus={() => {
-          form.current.scrollIntoView();
+          if (formRef.current)
+            formRef.current.scrollIntoView();
         }}
       />
-      <div className="my-3 p-3 bg-body rounded shadow-sm">
-        <h6 className="border-bottom pb-2 mb-0">
+      <div className='my-3 p-3 bg-body rounded shadow-sm'>
+        <h6 className='border-bottom pb-2 mb-0'>
           Atividades Pendentes ({taskPending.length})
         </h6>
         {
           taskPending.length > 0
-          ? taskMap(taskPending, "pending", 3)
-          : <CardBody>Não há atividades para exibir.</CardBody>
+            ? taskMap(taskPending, 'pending', 3)
+            : <CardBody>Não há atividades para exibir.</CardBody>
         }
         {
-          taskPending.length > 0 && (
-            <small className="d-block text-end mt-3">
+          taskPending.length > 3 && (
+            <small className='d-block text-end mt-3'>
               <button
-                type="button"
-                className="btn btn-link btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#customeModal"
+                type='button'
+                className='btn btn-link btn-sm'
+                data-bs-toggle='modal'
+                data-bs-target='#customModal'
               >
                 Ver todas
               </button>
             </small>
-        )}
+          )
+        }
       </div>
-      <div className="my-3 p-3 bg-body rounded shadow-sm">
-        <h6 className="border-bottom pb-2 mb-0">Atividades Concluídas</h6>
+      <div className='my-3 p-3 bg-body rounded shadow-sm'>
+        <h6 className='border-bottom pb-2 mb-0'>Atividades Concluídas</h6>
         {
           taskCompleted.length > 0
-            ? taskMap(taskCompleted, "completed", 5)
+            ? taskMap(taskCompleted, 'completed', 5)
             : <CardBody>Não há atividades para exibir.</CardBody>
         }
       </div>
       <div
-        className="my-3 p-3 bg-body rounded shadow-sm"
-        id="form"
-        ref={form}
+        className='my-3 p-3 bg-body rounded shadow-sm'
+        id='form'
+        ref={formRef}
       >
-        <FormIncludeTask include={(body: BodyTask) => Include(body)} />
+        <FormIncludeTask include={(body: BodyTask) => include(body)} />
       </div>
       <NotificationToast />
       <AlertToast
         show={alert.show}
-        close={() => dispatchAlert({ display: false })}
+        close={() => alterAlert({ display: false })}
         message={`${alert.message} ${alert.error}`}
         level={level}
       />
       <ModalTask
-        id={"customeModal"}
+        id={'customModal'}
         tasks={taskModal}
       />
     </div>
