@@ -91,6 +91,7 @@ export default function SignIn() {
                     type='text'
                     className='form-control'
                     id='name'
+                    name='name'
                     required
                   />
                 </div>
@@ -104,6 +105,7 @@ export default function SignIn() {
                     type='email'
                     className='form-control'
                     id='email'
+                    name='email'
                     required
                   />
                 </div>
@@ -117,6 +119,7 @@ export default function SignIn() {
                     type='password'
                     className='form-control'
                     id='password'
+                    name='password'
                     required
                   />
                 </div>

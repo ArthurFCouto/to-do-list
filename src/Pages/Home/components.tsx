@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FormEvent, ReactElement, useEffect, useReducer, useState } from 'react';
 import Spinner from '../../Components/Spinner';
-import { FormatDateBR, FormatDateEN } from '../../Components/Commom/functions';
+import { FormatDateBR, FormatDateEN } from '../../Util';
 import { Task } from './types';
 import Api from '../../Service';
 import { ClassReducer } from './functions';

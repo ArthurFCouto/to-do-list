@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
 import '@testing-library/jest-dom/extend-expect';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
@@ -37,13 +36,13 @@ describe.skip('Testando a página Login', () => {
         expect(window.location.pathname).toBe('/sign-in');
     });
 
-    it('Verificando se o alerta é ocultado por default', async () => {
+    it('Verificando se o alerta é ocultado por default', () => {
         render(<PAGE />);
         const alert = screen.queryByRole('alert');
         expect(alert).not.toBeInTheDocument();
     });
 
-    it('Verificando se o alerta é alterado ao tentar fazer login', async () => {
+    it('Verificando se o alerta é alterado ao tentar fazer login', () => {
         render(<PAGE />);
         const button = screen.getByTitle('Entrar');
         const inputEmail = screen.getByLabelText('Email');

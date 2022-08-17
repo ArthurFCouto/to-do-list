@@ -1,6 +1,6 @@
 import { ReactElement, useContext, useEffect, useState } from "react";
-import { SectionCenterStyled } from "../../Components/Commom/styles";
-import { FormatDateBR } from "../../Components/Commom/functions";
+import { SectionCenterStyled } from "../../Assets/styles";
+import { FormatDateBR } from "../../Util";
 import { UserContext } from "../../Context";
 import {
   AcordionItem,

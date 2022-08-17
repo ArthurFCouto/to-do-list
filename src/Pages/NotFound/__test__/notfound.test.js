@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
 import '@testing-library/jest-dom/extend-expect';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
