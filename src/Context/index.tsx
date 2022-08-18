@@ -3,6 +3,8 @@
  */
 
 import React, { useState, createContext } from 'react';
+import { parseCookies, destroyCookie } from 'nookies';
+import Config from '../Config';
 
 /*
  * Serão variáveis de contexto o user(objeto) e setUser(função)
@@ -39,14 +41,20 @@ type Props = {
 const UserProvider = ({children}: Props)=> {
   const [user, setUser] = useState<User>();
   const [logged, setLogged] = useState<boolean>(false);
+  const { token } = Config;
+
   const resetUser = () => {
     setLogged(false);
     setUser(undefined);
   }
+
   const loginUser = (props: User) => {
+    destroyCookie(null, token.USER_DATA);
+    destroyCookie(null, token.USER_TOKEN);
     setLogged(true);
     setUser(props);
   }
+  
   return (
     <UserContext.Provider value={{ user, logged, resetUser, loginUser }}>
       { children }
