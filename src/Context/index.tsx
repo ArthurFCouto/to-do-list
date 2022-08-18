@@ -3,7 +3,7 @@
  */
 
 import React, { useState, createContext } from 'react';
-import { parseCookies, destroyCookie } from 'nookies';
+import { destroyCookie } from 'nookies';
 import Config from '../Config';
 
 /*
@@ -46,11 +46,11 @@ const UserProvider = ({children}: Props)=> {
   const resetUser = () => {
     setLogged(false);
     setUser(undefined);
+    destroyCookie(null, token.USER_DATA);
+    destroyCookie(null, token.USER_TOKEN);
   }
 
   const loginUser = (props: User) => {
-    destroyCookie(null, token.USER_DATA);
-    destroyCookie(null, token.USER_TOKEN);
     setLogged(true);
     setUser(props);
   }

@@ -2,20 +2,12 @@
 import React, { FormEvent, ReactElement, useEffect, useReducer, useState } from 'react';
 import Spinner from '../../Components/Spinner';
 import { FormatDateBR, FormatDateEN } from '../../Util';
-import { Task } from './types';
+import { PropsActivities, Task } from './types';
 import Api from '../../Service';
 import { ClassReducer } from './functions';
+import { Link } from 'react-router-dom';
 
-export function Activities(props: {
-  id: number;
-  create: string;
-  task: string;
-  deadline: Date;
-  check?: boolean;
-  updatedAt?: string;
-  status: 'pending' | 'completed';
-  setAlert: Function;
-}) {
+export function Activities(props: PropsActivities) {
   const { check: checkTask, deadline, id, setAlert, status, task, updatedAt } = props;
   const [check, setCheck] = useState(checkTask);
   const [deleted, setDeleted] = useState<boolean>(false);
@@ -161,10 +153,7 @@ export function Activities(props: {
   );
 }
 
-export function CardBody(props: {
-  children: React.ReactNode;
-  border?: 'border-warning' | 'border-danger';
-}) {
+export function CardBody(props: { children: React.ReactNode; border?: 'border-warning' | 'border-danger'; }) {
   return (
     <div className={'card ' + props?.border}>
       <div className='card-body'>{props.children}</div>
@@ -178,6 +167,7 @@ export function Breadcumb(props: {
   update: Function;
   focus: Function;
 }) {
+  const { title, subTitle, update, focus } = props;
   return (
     <div className='d-flex align-items-center justify-content-between p-3 my-3 rounded shadow-sm bg-body'>
       <div className='d-flex'>
@@ -189,13 +179,13 @@ export function Breadcumb(props: {
           height='38'
         />
         <div className='lh-1'>
-          <h1 className='h6 mb-0 lh-1'>{props.title}</h1>
-          <small>{props.subTitle}</small>
+          <h1 className='h6 mb-0 lh-1'>{title}</h1>
+          <small>{subTitle}</small>
         </div>
       </div>
       <div className='btn-group'>
         <button
-          onClick={() => props.update()}
+          onClick={() => update()}
           type='button'
           className='btn btn-primary btn-sm'
           title='Atualizar lista'
@@ -203,7 +193,7 @@ export function Breadcumb(props: {
           <i className='bi bi-arrow-clockwise' />
         </button>
         <button
-          onClick={() => props.focus()}
+          onClick={() => focus()}
           type='button'
           className='btn btn-primary btn-sm active'
           title='Adicionar nova tarefa'
@@ -216,21 +206,23 @@ export function Breadcumb(props: {
 }
 
 export function FormIncludeTask(props: { include: Function }) {
-  const [task, setTask] = useState('');
-  const [deadline, setDealine] = useState('');
+  const { include } = props;
 
-  const include = async (e: FormEvent) => {
+  const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const task = String(formData.get('task'));
+    const date = String(formData.get('date'));
     const body = {
-      task: task,
-      deadline: FormatDateEN(deadline),
+      task,
+      deadline: FormatDateEN(date),
     };
-    await props.include(body);
+    await include(body);
     return;
   };
 
   return (
-    <form onSubmit={(e) => include(e)}>
+    <form onSubmit={(e) => register(e)}>
       <div className='mb-3'>
         <label htmlFor='date' className='form-label'>
           Informe o prazo de conclusão
@@ -240,7 +232,6 @@ export function FormIncludeTask(props: { include: Function }) {
           className='form-control'
           id='date'
           name='date'
-          onChange={(e) => setDealine(e.target.value)}
         />
       </div>
       <div className='mb-3'>
@@ -252,7 +243,6 @@ export function FormIncludeTask(props: { include: Function }) {
           id='task'
           name='task'
           rows={3}
-          onChange={(e) => setTask(e.target.value)}
         ></textarea>
       </div>
       <div className='text-end'>
@@ -265,17 +255,15 @@ export function FormIncludeTask(props: { include: Function }) {
   );
 }
 
-export function ModalTask(props: {
-  tasks: Array<Task>;
-  id: string;
-}) {
+export function ModalTask(props: { tasks: Array<Task>; id: string; }) {
   const [body, setBody] = useState<Array<ReactElement> | ReactElement>();
+  const { tasks, id } = props;
 
   const fillBody = () => {
     setBody(
-      props.tasks.map((task: Task, index: number) => (
-        <a
-          href='#'
+      tasks.map((task: Task, index: number) => (
+        <Link
+          to='#'
           className='list-group-item list-group-item-action d-flex gap-3 py-3'
           aria-current='true'
           key={index}
@@ -323,27 +311,27 @@ export function ModalTask(props: {
               {` ${FormatDateBR(task.createdAt)}`}
             </small>
           </div>
-        </a>
+        </Link>
       ))
     );
   }
 
   useEffect(() => {
     fillBody();
-  }, [props.tasks]);
+  }, [tasks]);
 
   return (
     <div
       className='modal fade'
-      id={props.id}
+      id={id}
       tabIndex={-1}
-      aria-labelledby='exampleModalLabel'
+      aria-labelledby='ModalLabel'
       aria-hidden='true'
     >
       <div className='modal-dialog modal-dialog-scrollable'>
         <div className='modal-content'>
           <div className='modal-header'>
-            <h5 className='modal-title' id='exampleModalLabel'>
+            <h5 className='modal-title' id='ModalLabel'>
               Todas as Atividades
             </h5>
             <button

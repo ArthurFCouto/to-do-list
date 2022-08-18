@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export function AlertReducer(state: any, action: any) {
   const { display } = action;
@@ -44,7 +44,7 @@ export function ClassReducer(state: any, action: { status: 'success' | 'danger' 
   return response[status] || response['success'];
 }
 
-export function AlertError (error: any, message: string, alterAlert: React.Dispatch<any>) {
+export function AlertError(error: any, message: string, alterAlert: React.Dispatch<any>) {
   const { statusText, data } = error;
   alterAlert({
     display: true,
