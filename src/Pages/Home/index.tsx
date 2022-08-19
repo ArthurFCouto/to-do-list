@@ -35,7 +35,7 @@ export default function Home() {
           status={status}
           task={task.task}
           updatedAt={task.updatedAt}
-          setAlert={(error: any, message: string)=> AlertError(error, message, alterAlert)}
+          setAlert={(error: any, message: string) => AlertError(error, message, alterAlert)}
         />
       ));
 

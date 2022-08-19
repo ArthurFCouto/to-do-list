@@ -1,31 +1,15 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { parseCookies } from 'nookies';
 import { UserContext } from '../../Context';
 import { NavItemLogin } from './components';
 
 export default function Menu() {
-  const { logged, loginUser, resetUser } = useContext(UserContext);
+  const { logged, resetUser } = useContext(UserContext);
 
   const logout = () => {
     if (resetUser)
       resetUser();
   };
-
-  const loading = () => {
-    try {
-      const cookies = parseCookies();
-      if (cookies.USER_DATA && loginUser)
-        loginUser(JSON.parse(cookies.USER_DATA));
-    } catch (error) {
-      console.log('Erro ao recuperar dados do User', error);
-      logout();
-    }
-  }
-
-  useEffect(() => {
-    loading();
-  }, []);
 
   return (
     <nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
